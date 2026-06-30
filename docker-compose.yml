@@ -1,0 +1,13 @@
+services:
+  app:
+    build:
+      context: .
+    env_file: .env
+    ports:
+      - "80:80"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

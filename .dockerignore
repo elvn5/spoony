@@ -1,0 +1,8 @@
+.git
+.gitignore
+.env
+*.md
+backend/tmp/
+backend/server
+frontend/node_modules/
+frontend/dist/

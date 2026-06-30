@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Dream Diary — dark purple night theme */
+    --background:  252 20% 7%;
+    --foreground:  260 20% 96%;
+
+    --card:        258 25% 11%;
+    --card-foreground: 260 20% 96%;
+
+    --popover:     258 28% 10%;
+    --popover-foreground: 260 20% 96%;
+
+    --primary:     262 83% 63%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary:   258 25% 18%;
+    --secondary-foreground: 260 20% 88%;
+
+    --muted:       258 22% 15%;
+    --muted-foreground: 260 15% 55%;
+
+    --accent:      262 60% 30%;
+    --accent-foreground: 262 90% 90%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 258 25% 18%;
+    --input:  258 25% 16%;
+    --ring:   262 83% 63%;
+
+    --radius: 0.75rem;
+  }
+
+  * {
+    @apply border-border;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    min-height: 100dvh;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    background: linear-gradient(135deg, hsl(262 83% 78%), hsl(220 80% 72%));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .glass {
+    background: hsl(var(--card) / 0.7);
+    backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--border));
+  }
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+}

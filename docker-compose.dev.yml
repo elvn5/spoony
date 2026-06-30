@@ -1,0 +1,24 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./backend:/workspace/backend
+      - ./frontend:/workspace/frontend
+      - frontend_node_modules:/workspace/frontend/node_modules
+    environment:
+      - NGROK_API_URL=http://ngrok:4040
+      - SUPERVISORD_CONF=/etc/supervisord.dev.conf
+
+  ngrok:
+    image: ngrok/ngrok:latest
+    command: http app:80 --log stdout
+    environment:
+      - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
+    ports:
+      - "4040:4040"
+    restart: unless-stopped
+
+volumes:
+  frontend_node_modules:

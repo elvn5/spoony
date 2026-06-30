@@ -1,0 +1,21 @@
+# Air config for Go hot reload (development only)
+root = "."
+tmp_dir = "tmp"
+
+[build]
+cmd = "go build -o ./tmp/server ."
+bin = "./tmp/server"
+delay = 500
+exclude_dir = ["vendor", "tmp"]
+include_ext = ["go"]
+kill_delay = "0s"
+
+[log]
+time = false
+
+[color]
+build   = "yellow"
+runner  = "green"
+
+[misc]
+clean_on_exit = true

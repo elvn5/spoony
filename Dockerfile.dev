@@ -1,0 +1,35 @@
+FROM golang:1.23-alpine
+
+RUN apk add --no-cache \
+    postgresql15 postgresql15-contrib \
+    nginx \
+    supervisor \
+    su-exec \
+    nodejs npm \
+    bash
+
+# air — Go live reloader (pin to a version compatible with Go 1.23)
+RUN go install github.com/air-verse/air@v1.61.1
+
+# Pre-download Go module cache (reused when source is bind-mounted)
+WORKDIR /workspace/backend
+COPY backend/go.mod backend/go.sum ./
+RUN go mod download
+
+# Pre-install frontend deps into a layer that the anonymous volume will inherit
+WORKDIR /workspace/frontend
+COPY frontend/package*.json ./
+RUN npm install
+
+# Runtime dirs
+RUN mkdir -p /run/postgresql && chown postgres:postgres /run/postgresql && \
+    mkdir -p /run/nginx
+
+COPY nginx.dev.conf /etc/nginx/http.d/default.conf
+COPY supervisord.dev.conf /etc/supervisord.dev.conf
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+EXPOSE 80
+
+ENTRYPOINT ["/docker-entrypoint.sh"]

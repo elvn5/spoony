@@ -1,0 +1,12 @@
+services:
+  app:
+    image: ghcr.io/${GITHUB_REPOSITORY:-your-org/dream-diary-tma}:${IMAGE_TAG:-latest}
+    env_file: .env
+    ports:
+      - "${EXPOSE_PORT:-80}:80"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
