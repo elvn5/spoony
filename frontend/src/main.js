@@ -9,7 +9,7 @@ import './styles/tailwind.css'
 
 const i18n = createI18n({
   legacy: false,
-  locale: localStorage.getItem('lang') || 'en',
+  locale: localStorage.getItem('lang') || 'ru',
   fallbackLocale: 'en',
   messages: { en, ru },
 })

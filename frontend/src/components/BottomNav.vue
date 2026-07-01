@@ -1,10 +1,10 @@
 <template>
-  <nav class="fixed bottom-0 left-0 right-0 z-40 safe-bottom">
+  <nav class="fixed bottom-0 left-0 right-0 z-40 safe-bottom md:hidden">
     <div class="border-t border-border bg-popover/95 backdrop-blur-md">
       <div class="flex justify-around items-center h-16 max-w-md mx-auto px-2">
-        <NavItem to="/"         :icon="HomeIcon"     label="Home"     />
-        <NavItem to="/profile"  :icon="UserIcon"     label="Profile"  />
-        <NavItem to="/settings" :icon="SettingsIcon" label="Settings" />
+        <NavItem to="/"        :icon="HomeIcon" :label="t('nav.home')" />
+        <NavItem to="/trainer" :icon="MapIcon"  :label="t('nav.trainer')" />
+        <NavItem to="/profile" :icon="UserIcon" :label="t('nav.profile')" />
       </div>
     </div>
   </nav>
@@ -13,7 +13,10 @@
 <script setup>
 import { h } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
-import { Home as HomeIcon, User as UserIcon, Settings as SettingsIcon } from 'lucide-vue-next'
+import { useI18n } from 'vue-i18n'
+import { Home as HomeIcon, Map as MapIcon, User as UserIcon } from 'lucide-vue-next'
+
+const { t } = useI18n()
 
 function NavItem({ to, icon, label }) {
   const route = useRoute()
