@@ -30,6 +30,29 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  async function loginAsGuest(name) {
+    loading.value = true
+    error.value = null
+    try {
+      let guestId = storage.get('guest_id')
+      if (!guestId) {
+        guestId = (crypto?.randomUUID?.() || 'g_' + Math.random().toString(36).slice(2) + Date.now().toString(36))
+        storage.set('guest_id', guestId)
+      }
+      const res = await authApi.guestLogin(guestId, name)
+      token.value = res.data.token
+      user.value = res.data.user
+      if (res.data.guest_id) storage.set('guest_id', res.data.guest_id)
+      storage.set('token', token.value)
+      storage.set('user', user.value)
+    } catch (e) {
+      error.value = e.response?.data?.error || 'Login failed'
+      throw e
+    } finally {
+      loading.value = false
+    }
+  }
+
   async function fetchMe() {
     try {
       const res = await authApi.getMe()
@@ -42,12 +65,14 @@ export const useUserStore = defineStore('user', () => {
     authApi.logout().catch(() => {})
     token.value = null
     user.value = null
-    storage.clear()
+    // Keep guest_id & lang so a returning guest recovers their account/progress.
+    storage.remove('token')
+    storage.remove('user')
   }
 
   return {
     user, token, loading, error,
     isAuthenticated,
-    loginWithTelegram, fetchMe, logout,
+    loginWithTelegram, loginAsGuest, fetchMe, logout,
   }
 })

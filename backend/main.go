@@ -35,9 +35,21 @@ func main() {
 	auth := api.Group("/auth")
 	{
 		auth.POST("/telegram-login", handlers.TelegramLogin)
+		auth.POST("/guest", handlers.GuestLogin)
 		auth.POST("/logout", handlers.Logout)
 		auth.GET("/me", middleware.AuthRequired(), handlers.GetMe)
 		auth.PUT("/profile", middleware.AuthRequired(), handlers.UpdateProfile)
+	}
+
+	// Spoony learning content
+	api.GET("/news", handlers.GetNews)
+
+	learn := api.Group("", middleware.AuthRequired())
+	{
+		learn.GET("/levels", handlers.GetLevels)
+		learn.GET("/levels/:id/cards", handlers.GetLevelCards)
+		learn.POST("/levels/:id/complete", handlers.CompleteLevel)
+		learn.GET("/stats", handlers.GetUserStats)
 	}
 
 	// Telegram webhook (no auth — called by Telegram servers)

@@ -1,22 +1,32 @@
 name: Deploy → Staging
 
+# main → staging
 on:
   push:
     branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: true
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    environment: staging
     permissions:
       contents: read
       packages: write
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Compute lowercase image name
+        id: img
+        run: echo "name=${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
@@ -30,7 +40,11 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:staging
+          tags: |
+            ${{ env.REGISTRY }}/${{ steps.img.outputs.name }}:staging
+            ${{ env.REGISTRY }}/${{ steps.img.outputs.name }}:sha-${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Deploy to staging server
         uses: appleboy/ssh-action@v1
@@ -40,24 +54,44 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             set -e
-            cd /opt/dream-diary-staging
+            mkdir -p /opt/spoony-staging
+            cd /opt/spoony-staging
 
+            # Log in so the server can pull the (possibly private) GHCR image.
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
+
+            # App environment (matches backend/config/config.go).
             cat > .env << 'EOF'
+            ENV=production
+            LOG_LEVEL=info
             TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
             TELEGRAM_BOT_USERNAME=${{ secrets.TELEGRAM_BOT_USERNAME }}
-            TELEGRAM_MINI_APP_URL=${{ secrets.STAGING_MINI_APP_URL }}
-            TELEGRAM_CHANNEL_URL=${{ secrets.TELEGRAM_CHANNEL_URL }}
-            WEBHOOK_URL=${{ secrets.STAGING_WEBHOOK_URL }}
-            GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+            TELEGRAM_MINI_APP_URL=${{ secrets.MINI_APP_URL }}
+            WEBHOOK_URL=${{ secrets.WEBHOOK_URL }}
             JWT_SECRET=${{ secrets.JWT_SECRET }}
             JWT_EXPIRATION_HOURS=720
-            CORS_ALLOWED_ORIGINS=${{ secrets.STAGING_CORS_ORIGINS }}
+            CORS_ALLOWED_ORIGINS=${{ secrets.CORS_ALLOWED_ORIGINS }}
             ADMIN_TOKEN=${{ secrets.ADMIN_TOKEN }}
-            STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
-            STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLISHABLE_KEY }}
-            ENV=production
             EOF
 
-            docker compose -f docker-compose.prod.yml --project-name dream_staging pull
-            docker compose -f docker-compose.prod.yml --project-name dream_staging up -d
+            # Host port defaults to 8081 on staging (override with the EXPOSE_PORT secret).
+            PORT="${{ secrets.EXPOSE_PORT }}"
+            : "${PORT:=8081}"
+
+            cat > docker-compose.yml << EOF
+            services:
+              app:
+                image: ${{ env.REGISTRY }}/${{ steps.img.outputs.name }}:staging
+                env_file: .env
+                ports:
+                  - "${PORT}:80"
+                volumes:
+                  - postgres_data:/var/lib/postgresql/data
+                restart: unless-stopped
+            volumes:
+              postgres_data:
+            EOF
+
+            docker compose --project-name spoony_staging pull
+            docker compose --project-name spoony_staging up -d
             docker image prune -f

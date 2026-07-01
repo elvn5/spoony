@@ -3,7 +3,7 @@
   "style": "default",
   "typescript": false,
   "tailwind": {
-    "config": "tailwind.config.js",
+    "config": "",
     "css": "src/styles/tailwind.css",
     "baseColor": "violet",
     "cssVariables": true

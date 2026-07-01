@@ -1,16 +1,23 @@
 name: Deploy → Production
 
+# release/*.*.* (e.g. release/1.4.0) → production
 on:
   push:
-    branches: [release/**]
+    branches:
+      - 'release/*.*.*'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    environment: production
     permissions:
       contents: read
       packages: write
@@ -18,11 +25,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Extract version from branch name
+      - name: Derive version from branch name
         id: version
-        run: |
-          BRANCH="${GITHUB_REF#refs/heads/release/}"
-          echo "tag=$BRANCH" >> "$GITHUB_OUTPUT"
+        run: echo "tag=${GITHUB_REF#refs/heads/release/}" >> "$GITHUB_OUTPUT"
+
+      - name: Compute lowercase image name
+        id: img
+        run: echo "name=${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
@@ -37,8 +46,10 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.tag }}
+            ${{ env.REGISTRY }}/${{ steps.img.outputs.name }}:latest
+            ${{ env.REGISTRY }}/${{ steps.img.outputs.name }}:${{ steps.version.outputs.tag }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Deploy to production server
         uses: appleboy/ssh-action@v1
@@ -48,24 +59,45 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             set -e
-            cd /opt/dream-diary
+            mkdir -p /opt/spoony
+            cd /opt/spoony
 
+            # Log in so the server can pull the (possibly private) GHCR image.
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
+
+            # App environment (matches backend/config/config.go).
             cat > .env << 'EOF'
+            ENV=production
+            LOG_LEVEL=info
             TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
             TELEGRAM_BOT_USERNAME=${{ secrets.TELEGRAM_BOT_USERNAME }}
-            TELEGRAM_MINI_APP_URL=${{ secrets.PROD_MINI_APP_URL }}
-            TELEGRAM_CHANNEL_URL=${{ secrets.TELEGRAM_CHANNEL_URL }}
-            WEBHOOK_URL=${{ secrets.PROD_WEBHOOK_URL }}
-            GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+            TELEGRAM_MINI_APP_URL=${{ secrets.MINI_APP_URL }}
+            WEBHOOK_URL=${{ secrets.WEBHOOK_URL }}
             JWT_SECRET=${{ secrets.JWT_SECRET }}
             JWT_EXPIRATION_HOURS=720
-            CORS_ALLOWED_ORIGINS=${{ secrets.PROD_CORS_ORIGINS }}
+            CORS_ALLOWED_ORIGINS=${{ secrets.CORS_ALLOWED_ORIGINS }}
             ADMIN_TOKEN=${{ secrets.ADMIN_TOKEN }}
-            STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
-            STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLISHABLE_KEY }}
-            ENV=production
             EOF
 
-            docker compose -f docker-compose.prod.yml --project-name dream_prod pull
-            docker compose -f docker-compose.prod.yml --project-name dream_prod up -d
+            # Host port defaults to 80 on production (override with the EXPOSE_PORT secret).
+            PORT="${{ secrets.EXPOSE_PORT }}"
+            : "${PORT:=80}"
+
+            # Pin to the exact released version for an immutable, rollback-friendly deploy.
+            cat > docker-compose.yml << EOF
+            services:
+              app:
+                image: ${{ env.REGISTRY }}/${{ steps.img.outputs.name }}:${{ steps.version.outputs.tag }}
+                env_file: .env
+                ports:
+                  - "${PORT}:80"
+                volumes:
+                  - postgres_data:/var/lib/postgresql/data
+                restart: unless-stopped
+            volumes:
+              postgres_data:
+            EOF
+
+            docker compose --project-name spoony_prod pull
+            docker compose --project-name spoony_prod up -d
             docker image prune -f

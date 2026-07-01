@@ -1,6 +1,25 @@
-# Telegram Mini App Boilerplate
+# Spoony — Telegram Mini App
 
-Production-ready boilerplate for building Telegram Mini Apps (TMA) with Go backend, Vue 3 frontend, PostgreSQL, and an admin panel.
+**Spoony** is a Telegram Mini App that helps children learn English through Russian.
+
+### Pages
+1. **Главная / Home** — a Facebook-style news feed with tips and updates from Spoony.
+2. **Тренажёр слов / Word Trainer** — a journey across England where every city is a new exercise. Each exercise is a *"Find the pair"* memory game: tap cards to match a picture with its English word. A correct match triggers a green `box-shadow` glow animation. Cities unlock one after another as you complete them.
+3. **Профиль / Profile** — user info plus learning stats (cities completed, words learned, stars earned).
+
+Learning content (news, levels/cities, vocabulary card pairs, and per-user progress) lives in PostgreSQL — see [`backend/database/migrations.go`](backend/database/migrations.go) for the schema and seed data, and [`backend/handlers/content.go`](backend/handlers/content.go) for the API.
+
+### Works inside **and** outside Telegram
+- **Inside Telegram** — one-tap login via Telegram `initData`.
+- **As a regular website** — a **guest login** (`POST /api/auth/guest`) creates an account tied to a persistent `guest_id` stored in the browser, so a returning visitor keeps their progress. Optional display name. Works in production.
+- A separate dev-only bypass signs you in as a **demo kid** when `initData` can't be verified (disabled when `ENV=production`).
+
+### Responsive
+The UI adapts to screen size: a bottom tab bar on mobile, and a left **sidebar** with wider content layouts on desktop/laptop (`md:` breakpoint and up). The "Find the pair" grid grows from 3 columns on phones to 6 on large screens.
+
+---
+
+Built on a production-ready boilerplate for Telegram Mini Apps (TMA) with a Go backend, Vue 3 frontend, PostgreSQL, and an admin panel.
 
 ## Tech Stack
 
@@ -8,7 +27,7 @@ Production-ready boilerplate for building Telegram Mini Apps (TMA) with Go backe
 |-----------|------------------------------------------------|
 | Backend   | Go 1.23 + Gin                                  |
 | Database  | PostgreSQL 15                                  |
-| Frontend  | Vue 3 + Vite + Tailwind CSS + shadcn-vue       |
+| Frontend  | Vue 3 + Vite + Tailwind CSS v4 + shadcn-vue    |
 | Container | Docker — single all-in-one container           |
 | CI/CD     | GitHub Actions → ghcr.io                       |
 
