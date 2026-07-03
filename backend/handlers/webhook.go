@@ -7,7 +7,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"strings"
 	"time"
 
 	"tma-boilerplate/config"
@@ -117,10 +116,6 @@ func discoverNgrokURL(apiURL string) (string, error) {
 	return "", fmt.Errorf("ngrok tunnel not available after 40s")
 }
 
-func isHTTPS(url string) bool {
-	return strings.HasPrefix(url, "https://")
-}
-
 func RegisterWebhook() error {
 	if config.App.TelegramBotToken == "" {
 		return fmt.Errorf("TELEGRAM_BOT_TOKEN is not set")
@@ -134,10 +129,11 @@ func RegisterWebhook() error {
 		}
 		baseURL = discovered
 		log.Printf("Discovered ngrok URL: %s", baseURL)
-		if config.App.TelegramMiniAppURL == "" || !isHTTPS(config.App.TelegramMiniAppURL) {
-			config.App.TelegramMiniAppURL = baseURL
-			log.Printf("Mini App URL set to ngrok: %s", baseURL)
-		}
+		// This branch only runs in dev (ngrok is only wired up via docker-compose.dev.yml),
+		// so always point the Mini App at the freshly discovered tunnel, overriding
+		// whatever placeholder is left in TELEGRAM_MINI_APP_URL.
+		config.App.TelegramMiniAppURL = baseURL
+		log.Printf("Mini App URL set to ngrok: %s", baseURL)
 	}
 	if baseURL == "" {
 		return fmt.Errorf("WEBHOOK_URL is not set (and NGROK_API_URL is not configured)")

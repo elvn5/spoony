@@ -42,7 +42,7 @@ func GetLevels(c *gin.Context) {
 	userID := c.GetInt("user_id")
 
 	rows, err := database.DB.Query(`
-		SELECT l.id, l.city, l.title_ru, l.description, l.emoji, l.order_index, l.pos_x, l.pos_y,
+		SELECT l.id, l.city, l.title_ru, l.description, l.emoji, l.order_index, l.pos_x, l.pos_y, l.game_type,
 			COALESCE(p.completed, false), COALESCE(p.stars, 0)
 		FROM levels l
 		LEFT JOIN user_progress p ON p.level_id = l.id AND p.user_id = $1
@@ -58,7 +58,7 @@ func GetLevels(c *gin.Context) {
 	for rows.Next() {
 		var l models.Level
 		if err := rows.Scan(&l.ID, &l.City, &l.TitleRu, &l.Description, &l.Emoji,
-			&l.OrderIndex, &l.PosX, &l.PosY, &l.Completed, &l.Stars); err != nil {
+			&l.OrderIndex, &l.PosX, &l.PosY, &l.GameType, &l.Completed, &l.Stars); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "scan error"})
 			return
 		}

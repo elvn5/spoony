@@ -65,7 +65,6 @@ jobs:
             ENV=production
             LOG_LEVEL=info
             TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
-            TELEGRAM_BOT_USERNAME=${{ secrets.TELEGRAM_BOT_USERNAME }}
             TELEGRAM_MINI_APP_URL=${{ secrets.MINI_APP_URL }}
             WEBHOOK_URL=${{ secrets.WEBHOOK_URL }}
             JWT_SECRET=${{ secrets.JWT_SECRET }}
