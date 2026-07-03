@@ -9,9 +9,10 @@
     </RouterLink>
 
     <nav class="flex flex-col gap-1.5">
-      <SideItem to="/"        :icon="HomeIcon" :label="t('nav.home')" />
-      <SideItem to="/trainer" :icon="MapIcon"  :label="t('nav.trainer')" />
-      <SideItem to="/profile" :icon="UserIcon" :label="t('nav.profile')" />
+      <SideItem to="/"         :icon="HomeIcon"   :label="t('nav.home')" />
+      <SideItem to="/trainer"  :icon="MapIcon"    :label="t('nav.trainer')" />
+      <SideItem to="/alphabet" :icon="PuzzleIcon" :label="t('nav.alphabet')" />
+      <SideItem to="/profile"  :icon="UserIcon"   :label="t('nav.profile')" />
     </nav>
 
     <div v-if="userStore.user" class="mt-auto flex items-center gap-3 px-2 pt-4 border-t border-border">
@@ -30,7 +31,7 @@ import { RouterLink, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useUserStore } from '../store/user'
 import Avatar from './ui/avatar.vue'
-import { Home as HomeIcon, Map as MapIcon, User as UserIcon } from 'lucide-vue-next'
+import { Home as HomeIcon, Map as MapIcon, Puzzle as PuzzleIcon, User as UserIcon } from 'lucide-vue-next'
 
 const { t } = useI18n()
 const userStore = useUserStore()

@@ -46,6 +46,10 @@ func RunMigrations() {
 			pos_y INT NOT NULL DEFAULT 50
 		)`,
 
+		// game_type distinguishes the "Find the pair" memory game from other
+		// exercise types (e.g. "word_build" — assemble a word from letter blocks).
+		`ALTER TABLE levels ADD COLUMN IF NOT EXISTS game_type VARCHAR(32) NOT NULL DEFAULT 'match'`,
+
 		// Vocabulary items — each produces a picture card + a word card.
 		`CREATE TABLE IF NOT EXISTS vocab_items (
 			id SERIAL PRIMARY KEY,
@@ -81,6 +85,7 @@ func RunMigrations() {
 func seedContent() {
 	seedNews()
 	seedLevels()
+	seedGreetingLevel()
 }
 
 func seedNews() {
@@ -98,7 +103,7 @@ func seedNews() {
 		likes                                        int
 	}
 	posts := []post{
-		{"Spoony", "🥄", "Добро пожаловать в Spoony!", "Привет, друг! Я ложечка Spoony, и я помогу тебе выучить английский язык. Открывай «Тренажёр слов» и отправляйся в путешествие по Англии! 🇬🇧", "👋", "Новости", 128},
+		{"Spoony", "🥄", "Добро пожаловать в Spoony!", "Привет, друг! Я ложечка Spoony, и я помогу тебе выучить английский язык. Открывай «Тренажёр» и отправляйся в путешествие по Англии! 🇬🇧", "👋", "Новости", 128},
 		{"Spoony", "🥄", "Новый город на маршруте — Ливерпуль!", "Мы добавили музыкальный город Ливерпуль. Выучи английские слова про музыку: guitar, drum, piano и другие! 🎸", "🎸", "Обновление", 96},
 		{"Учитель Сова", "🦉", "Слово дня: APPLE 🍎", "Apple — это «яблоко». Попробуй сказать вслух: «ЭП-пл». А какое твоё любимое яблоко — красное или зелёное?", "🍎", "Слово дня", 74},
 		{"Spoony", "🥄", "Совет: учись каждый день по чуть-чуть", "Лучше заниматься 10 минут каждый день, чем час один раз в неделю. Проходи по одному городу в день — и ты быстро выучишь много слов! ⭐", "📅", "Совет", 61},
@@ -192,4 +197,55 @@ func seedLevels() {
 		}
 	}
 	log.Printf("Seeded %d levels", len(levels))
+}
+
+// seedGreetingLevel inserts the "Greeting and introduction" level at the front
+// of the route. It runs independently of seedLevels so it also backfills
+// databases that were already seeded before this level type existed.
+func seedGreetingLevel() {
+	var count int
+	if err := DB.QueryRow(`SELECT COUNT(*) FROM levels WHERE game_type = 'word_build'`).Scan(&count); err != nil {
+		log.Printf("seedGreetingLevel: count failed: %v", err)
+		return
+	}
+	if count > 0 {
+		return
+	}
+
+	if _, err := DB.Exec(`UPDATE levels SET order_index = order_index + 1`); err != nil {
+		log.Printf("seedGreetingLevel: reindex failed: %v", err)
+		return
+	}
+
+	var levelID int
+	err := DB.QueryRow(
+		`INSERT INTO levels (city, title_ru, description, emoji, order_index, pos_x, pos_y, game_type)
+		 VALUES ($1,$2,$3,$4,0,$5,$6,'word_build') RETURNING id`,
+		"Hello!", "Приветствие и знакомство", "Знакомство", "👋", 50, 96,
+	).Scan(&levelID)
+	if err != nil {
+		log.Printf("seedGreetingLevel: insert level failed: %v", err)
+		return
+	}
+
+	type vocab struct{ en, ru, emoji string }
+	words := []vocab{
+		{"hello", "привет", "👋"},
+		{"hi", "привет", "🙋"},
+		{"bye", "пока", "🙋‍♂️"},
+		{"yes", "да", "✅"},
+		{"no", "нет", "❌"},
+		{"please", "пожалуйста", "🙏"},
+		{"thanks", "спасибо", "🙏"},
+		{"friend", "друг", "🤝"},
+	}
+	for _, w := range words {
+		if _, err := DB.Exec(
+			`INSERT INTO vocab_items (level_id, word_en, word_ru, emoji) VALUES ($1,$2,$3,$4)`,
+			levelID, w.en, w.ru, w.emoji,
+		); err != nil {
+			log.Printf("seedGreetingLevel: insert vocab failed: %v", err)
+		}
+	}
+	log.Printf("Seeded greeting level with %d words", len(words))
 }

@@ -161,7 +161,6 @@ docker compose up --build -d
 | Variable                | Required   | Description                                        |
 |-------------------------|------------|----------------------------------------------------|
 | `TELEGRAM_BOT_TOKEN`    | Yes        | Bot token from @BotFather                          |
-| `TELEGRAM_BOT_USERNAME` | No         | Bot username (without @)                           |
 | `TELEGRAM_MINI_APP_URL` | Yes        | Public HTTPS URL of the Mini App frontend          |
 | `JWT_SECRET`            | Yes        | Random string, min 32 chars                        |
 | `ADMIN_TOKEN`           | Yes (prod) | Token for admin panel (`X-Admin-Token` header)     |
@@ -242,7 +241,6 @@ Developer → PR → main → [CI] → Staging  (ghcr.io:staging)
 | Secret                  | Description                                    |
 |-------------------------|------------------------------------------------|
 | `TELEGRAM_BOT_TOKEN`    | Bot token                                      |
-| `TELEGRAM_BOT_USERNAME` | Bot username (without @)                       |
 | `JWT_SECRET`            | JWT secret                                     |
 | `ADMIN_TOKEN`           | Admin panel token                              |
 | `STAGING_WEBHOOK_URL`   | `https://staging.your-domain.com`              |

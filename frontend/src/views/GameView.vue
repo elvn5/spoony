@@ -15,42 +15,51 @@
       </div>
     </header>
 
-    <!-- Stats bar -->
-    <div class="flex gap-3 mb-4">
-      <div class="flex-1 rounded-xl bg-card border border-border py-2 text-center">
-        <p class="text-[10px] uppercase tracking-wide text-muted-foreground">{{ $t('game.found') }}</p>
-        <p class="font-bold text-primary">{{ matchedPairs }} / {{ items.length }}</p>
-      </div>
-      <div class="flex-1 rounded-xl bg-card border border-border py-2 text-center">
-        <p class="text-[10px] uppercase tracking-wide text-muted-foreground">{{ $t('game.moves') }}</p>
-        <p class="font-bold">{{ moves }}</p>
-      </div>
-    </div>
-
-    <p class="text-center text-muted-foreground text-xs mb-4">{{ $t('game.hint') }}</p>
-
     <!-- Loading -->
     <div v-if="loading" class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">
       <div v-for="n in 12" :key="n" class="aspect-square rounded-2xl bg-muted animate-pulse" />
     </div>
 
-    <!-- Card grid -->
-    <div v-else class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">
-      <button
-        v-for="card in cards"
-        :key="card.uid"
-        class="aspect-square rounded-2xl flex items-center justify-center text-center select-none transition-all duration-200 border-2"
-        :class="cardClass(card)"
-        :disabled="isFaceUp(card) || locking"
-        @click="flip(card)"
-      >
-        <template v-if="isFaceUp(card)">
-          <span v-if="card.type === 'image'" class="text-4xl animate-pop">{{ card.content }}</span>
-          <span v-else class="px-1 font-extrabold text-base leading-tight animate-pop break-words">{{ card.content }}</span>
-        </template>
-        <span v-else class="text-2xl opacity-90">🥄</span>
-      </button>
-    </div>
+    <!-- Word-build exercise (e.g. greeting & introduction level) -->
+    <WordBuildGame
+      v-else-if="isWordBuild"
+      :key="restartKey"
+      :items="items"
+      @complete="finish"
+    />
+
+    <!-- "Find the pair" memory game -->
+    <template v-else>
+      <div class="flex gap-3 mb-4">
+        <div class="flex-1 rounded-xl bg-card border border-border py-2 text-center">
+          <p class="text-[10px] uppercase tracking-wide text-muted-foreground">{{ $t('game.found') }}</p>
+          <p class="font-bold text-primary">{{ matchedPairs }} / {{ items.length }}</p>
+        </div>
+        <div class="flex-1 rounded-xl bg-card border border-border py-2 text-center">
+          <p class="text-[10px] uppercase tracking-wide text-muted-foreground">{{ $t('game.moves') }}</p>
+          <p class="font-bold">{{ moves }}</p>
+        </div>
+      </div>
+
+      <p class="text-center text-muted-foreground text-xs mb-4">{{ $t('game.hint') }}</p>
+
+      <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+        <button
+          v-for="card in cards"
+          :key="card.uid"
+          class="aspect-square rounded-2xl flex items-center justify-center text-center select-none transition-all duration-200 border-2"
+          :class="cardClass(card)"
+          :disabled="isFaceUp(card) || locking"
+          @click="flip(card)"
+        >
+          <template v-if="isFaceUp(card)">
+            <span v-if="card.type === 'image'" class="text-4xl animate-pop">{{ card.content }}</span>
+            <span v-else class="px-1 font-extrabold text-base leading-tight animate-pop break-words">{{ card.content }}</span>
+          </template>
+          <span v-else class="text-2xl opacity-90">🥄</span>
+        </button>
+      </div>
+    </template>
 
     <!-- Win overlay -->
     <Transition name="fade">
@@ -64,8 +73,8 @@
             <StarIcon
               v-for="s in 3" :key="s"
               class="h-9 w-9 transition-transform"
-              :class="s <= stars ? 'text-yellow-400 scale-110' : 'text-muted-foreground/25'"
-              :fill="s <= stars ? 'currentColor' : 'none'"
+              :class="s <= finalStars ? 'text-yellow-400 scale-110' : 'text-muted-foreground/25'"
+              :fill="s <= finalStars ? 'currentColor' : 'none'"
             />
           </div>
 
@@ -94,6 +103,7 @@ import { hapticFeedback } from '../services/telegram'
 import { speakWord, stopSpeaking } from '../services/tts'
 import Button from '../components/ui/button.vue'
 import Card from '../components/ui/card.vue'
+import WordBuildGame from './trainer/WordBuildGame.vue'
 import { ArrowLeft as ArrowLeftIcon, ArrowRight as ArrowRightIcon, Star as StarIcon } from 'lucide-vue-next'
 
 const props = defineProps({ id: { type: [String, Number], required: true } })
@@ -109,8 +119,11 @@ const moves = ref(0)
 const locking = ref(false)
 const loading = ref(true)
 const won = ref(false)
+const finalStars = ref(1)
+const restartKey = ref(0)
 
 const level = computed(() => levels.value.find(l => String(l.id) === String(props.id)))
+const isWordBuild = computed(() => level.value?.game_type === 'word_build')
 const nextLevel = computed(() => {
   if (!level.value) return null
   return levels.value.find(l => l.order_index === level.value.order_index + 1) || null
@@ -189,11 +202,12 @@ function flip(card) {
   }
 }
 
-async function finish() {
+async function finish(starsOverride) {
   won.value = true
+  finalStars.value = starsOverride ?? stars.value
   hapticFeedback('heavy')
   try {
-    await learnApi.completeLevel(props.id, stars.value)
+    await learnApi.completeLevel(props.id, finalStars.value)
   } catch {}
 }
 
@@ -204,6 +218,7 @@ function restart() {
   moves.value = 0
   locking.value = false
   won.value = false
+  restartKey.value++
   buildDeck()
 }
 
