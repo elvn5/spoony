@@ -43,6 +43,8 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { hapticFeedback, showAlert } from '../services/telegram'
 import { getCompletedAlphabetLevels } from '../services/alphabetProgress'
+import { phonicsWords, COMBO_GROUPS } from '../data/phonicsWords'
+import { greetingWords } from '../data/greetingWords'
 import { Puzzle as PuzzleIcon } from 'lucide-vue-next'
 
 const router = useRouter()
@@ -50,10 +52,31 @@ const { t } = useI18n()
 
 const levelCards = computed(() => {
   const completed = getCompletedAlphabetLevels()
-  return [
-    { id: 1, title: t('alphabet.level1Title'), range: 'A B C D E F G H I J K L M', completed: completed.includes(1), unlocked: true },
-    { id: 2, title: t('alphabet.level2Title'), range: 'N O P Q R S T U V W X Y Z', completed: completed.includes(2), unlocked: completed.includes(1) },
+  const greetingRange = greetingWords.map(w => w.word_en.toUpperCase()).join(' · ')
+  const cards = [
+    { id: 1, title: t('alphabet.level1Title'), range: 'A B C D E F G H I J K L M', completed: completed.includes(1), unlocked: true, path: '/alphabet/1' },
+    { id: 2, title: t('alphabet.level2Title'), range: 'N O P Q R S T U V W X Y Z', completed: completed.includes(2), unlocked: completed.includes(1), path: '/alphabet/2' },
+    { id: 3, title: t('alphabet.matchTitle'), range: greetingRange, completed: completed.includes(3), unlocked: completed.includes(2), path: '/alphabet/match/play' },
+    { id: 4, title: t('alphabet.level3Title'), range: greetingRange, completed: completed.includes(4), unlocked: completed.includes(3), path: '/alphabet/words/play' },
   ]
+
+  COMBO_GROUPS.forEach((group, i) => {
+    const id = 5 + i
+    const examples = phonicsWords
+      .filter(w => group.combos.includes(w.combo))
+      .slice(0, 3)
+      .map(w => w.word_en.toUpperCase())
+    cards.push({
+      id,
+      title: group.combos.join(', '),
+      range: examples.join(' · ') + '...',
+      completed: completed.includes(id),
+      unlocked: completed.includes(id - 1),
+      path: `/alphabet/combos/${group.id}`,
+    })
+  })
+
+  return cards
 })
 
 function openLevel(lvl) {
@@ -63,6 +86,6 @@ function openLevel(lvl) {
     return
   }
   hapticFeedback('light')
-  router.push(`/alphabet/${lvl.id}`)
+  router.push(lvl.path)
 }
 </script>

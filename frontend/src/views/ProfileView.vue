@@ -39,6 +39,15 @@
         </div>
       </div>
 
+      <!-- Continue in Telegram (guest accounts on the website only) -->
+      <Card v-if="userStore.isGuest && !inTelegram && telegramLink" class="p-4 border-primary/30 bg-primary/5">
+        <p class="text-sm font-semibold mb-1">{{ $t('profile.continueInTelegram') }}</p>
+        <p class="text-muted-foreground text-xs mb-3">{{ $t('profile.continueInTelegramHint') }}</p>
+        <Button as="a" :href="telegramLink" target="_blank" rel="noopener" variant="gradient" class="w-full">
+          <SendIcon class="h-4 w-4" /> {{ $t('profile.openTelegramBot') }}
+        </Button>
+      </Card>
+
       <!-- Language switch -->
       <Card class="p-4">
         <p class="text-sm font-semibold mb-3">{{ $t('profile.language') }}</p>
@@ -72,23 +81,37 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useUserStore } from '../store/user'
-import { learnApi } from '../services/api'
+import { learnApi, telegramApi } from '../services/api'
+import { storage } from '../services/storage'
+import { isTelegramEnvironment } from '../services/telegram'
 import { formatDate } from '../utils/helpers'
 import Button from '../components/ui/button.vue'
 import Card from '../components/ui/card.vue'
 import Avatar from '../components/ui/avatar.vue'
-import { LogOut as LogOutIcon } from 'lucide-vue-next'
+import { LogOut as LogOutIcon, Send as SendIcon } from 'lucide-vue-next'
 
 const router = useRouter()
 const userStore = useUserStore()
 const { locale } = useI18n()
 
 const stats = reactive({ total_levels: 0, completed_levels: 0, total_stars: 0, learned_words: 0 })
+const inTelegram = isTelegramEnvironment()
+const telegramLink = ref('')
 
 async function loadStats() {
   try {
     const res = await learnApi.getStats()
     Object.assign(stats, res.data)
+  } catch {}
+}
+
+async function loadTelegramLink() {
+  const guestId = storage.get('guest_id')
+  if (!guestId) return
+  try {
+    const res = await telegramApi.getBotInfo()
+    const username = res.data?.username
+    if (username) telegramLink.value = `https://t.me/${username}?start=${encodeURIComponent(guestId)}`
   } catch {}
 }
 
@@ -102,5 +125,8 @@ function handleLogout() {
   router.push('/')
 }
 
-onMounted(loadStats)
+onMounted(() => {
+  loadStats()
+  loadTelegramLink()
+})
 </script>

@@ -203,6 +203,13 @@ func seedLevels() {
 // of the route. It runs independently of seedLevels so it also backfills
 // databases that were already seeded before this level type existed.
 func seedGreetingLevel() {
+	// Since it's the only level shown on the map right now (the city route is
+	// hidden — see GetLevels), keep it centered. Runs every startup so
+	// already-seeded databases pick up the corrected position too.
+	if _, err := DB.Exec(`UPDATE levels SET pos_x = 50, pos_y = 50 WHERE game_type = 'word_build'`); err != nil {
+		log.Printf("seedGreetingLevel: reposition failed: %v", err)
+	}
+
 	var count int
 	if err := DB.QueryRow(`SELECT COUNT(*) FROM levels WHERE game_type = 'word_build'`).Scan(&count); err != nil {
 		log.Printf("seedGreetingLevel: count failed: %v", err)
@@ -221,7 +228,7 @@ func seedGreetingLevel() {
 	err := DB.QueryRow(
 		`INSERT INTO levels (city, title_ru, description, emoji, order_index, pos_x, pos_y, game_type)
 		 VALUES ($1,$2,$3,$4,0,$5,$6,'word_build') RETURNING id`,
-		"Hello!", "Приветствие и знакомство", "Знакомство", "👋", 50, 96,
+		"Hello!", "Приветствие и знакомство", "Знакомство", "👋", 50, 50,
 	).Scan(&levelID)
 	if err != nil {
 		log.Printf("seedGreetingLevel: insert level failed: %v", err)

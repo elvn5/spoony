@@ -11,6 +11,8 @@ export const useUserStore = defineStore('user', () => {
   const error = ref(null)
 
   const isAuthenticated = computed(() => !!token.value)
+  // A guest account has no linked Telegram identity yet.
+  const isGuest = computed(() => isAuthenticated.value && !user.value?.telegram_id)
 
   async function loginWithTelegram() {
     loading.value = true
@@ -72,7 +74,7 @@ export const useUserStore = defineStore('user', () => {
 
   return {
     user, token, loading, error,
-    isAuthenticated,
+    isAuthenticated, isGuest,
     loginWithTelegram, loginAsGuest, fetchMe, logout,
   }
 })

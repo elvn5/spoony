@@ -41,11 +41,15 @@ func GetNews(c *gin.Context) {
 func GetLevels(c *gin.Context) {
 	userID := c.GetInt("user_id")
 
+	// TEMPORARY: only the "Greeting and introduction" level is live for now —
+	// the city route is hidden until it's ready. Drop this WHERE clause to
+	// bring the cities back.
 	rows, err := database.DB.Query(`
 		SELECT l.id, l.city, l.title_ru, l.description, l.emoji, l.order_index, l.pos_x, l.pos_y, l.game_type,
 			COALESCE(p.completed, false), COALESCE(p.stars, 0)
 		FROM levels l
 		LEFT JOIN user_progress p ON p.level_id = l.id AND p.user_id = $1
+		WHERE l.game_type = 'word_build'
 		ORDER BY l.order_index ASC, l.id ASC`, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "database error"})
@@ -148,7 +152,8 @@ func GetUserStats(c *gin.Context) {
 
 	var totalLevels, completedLevels, totalStars, learnedWords int
 
-	database.DB.QueryRow(`SELECT COUNT(*) FROM levels`).Scan(&totalLevels)
+	// Matches the temporary game_type filter in GetLevels — see the comment there.
+	database.DB.QueryRow(`SELECT COUNT(*) FROM levels WHERE game_type = 'word_build'`).Scan(&totalLevels)
 	database.DB.QueryRow(
 		`SELECT COUNT(*), COALESCE(SUM(stars),0) FROM user_progress WHERE user_id = $1 AND completed = true`,
 		userID).Scan(&completedLevels, &totalStars)
