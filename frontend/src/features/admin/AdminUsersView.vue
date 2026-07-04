@@ -5,11 +5,18 @@
       <span class="text-muted-foreground text-sm">{{ total }} total</span>
     </div>
 
-    <!-- Search -->
-    <div class="relative mb-4">
-      <SearchIcon class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-      <Input v-model="search" placeholder="Search by name, username or Telegram ID…" class="pl-9"
-        @input="onSearch" />
+    <!-- Search + filters -->
+    <div class="flex flex-col sm:flex-row gap-3 mb-4">
+      <div class="relative flex-1">
+        <SearchIcon class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+        <Input v-model="search" placeholder="Search by name, username or Telegram ID…" class="pl-9"
+          @input="onSearch" />
+      </div>
+      <Select :value="type" class="sm:w-44" @change="e => { type = e.target.value; page = 1; load() }">
+        <option value="all">All users</option>
+        <option value="telegram">✈️ Telegram only</option>
+        <option value="guest">🌐 Guest only</option>
+      </Select>
     </div>
 
     <!-- Table -->
@@ -22,6 +29,7 @@
             <tr class="border-b border-border text-left">
               <th class="px-4 py-3 text-xs text-muted-foreground font-medium uppercase tracking-wider">ID</th>
               <th class="px-4 py-3 text-xs text-muted-foreground font-medium uppercase tracking-wider">User</th>
+              <th class="px-4 py-3 text-xs text-muted-foreground font-medium uppercase tracking-wider">Type</th>
               <th class="px-4 py-3 text-xs text-muted-foreground font-medium uppercase tracking-wider">Joined</th>
               <th class="px-4 py-3 text-xs text-muted-foreground font-medium uppercase tracking-wider">Actions</th>
             </tr>
@@ -31,10 +39,19 @@
               <td class="px-4 py-3 text-muted-foreground font-mono text-xs">{{ u.id }}</td>
               <td class="px-4 py-3">
                 <p class="font-medium">{{ u.first_name }} {{ u.last_name }}</p>
-                <p class="text-xs text-muted-foreground">{{ u.username ? '@' + u.username : '' }} · TG {{ u.telegram_id }}</p>
+                <p class="text-xs text-muted-foreground">
+                  {{ u.username ? '@' + u.username : '' }}
+                  <span v-if="u.telegram_id">· TG {{ u.telegram_id }}</span>
+                </p>
+              </td>
+              <td class="px-4 py-3">
+                <Badge :variant="u.guest_id ? 'secondary' : 'default'" class="text-[10px]">
+                  {{ u.guest_id ? '🌐 Guest' : '✈️ Telegram' }}
+                </Badge>
               </td>
               <td class="px-4 py-3 text-muted-foreground text-xs">{{ u.created_at.slice(0, 10) }}</td>
-              <td class="px-4 py-3">
+              <td class="px-4 py-3 flex gap-1">
+                <Button size="sm" variant="ghost" class="text-xs h-7" @click="openProgress(u)">Progress</Button>
                 <Button size="sm" variant="ghost"
                   class="text-xs h-7 text-destructive hover:text-destructive"
                   @click="deleteUser(u)">Delete</Button>
@@ -51,6 +68,8 @@
       <span class="text-muted-foreground text-sm">Page {{ page }} / {{ Math.ceil(total / perPage) }}</span>
       <Button variant="ghost" size="sm" :disabled="page * perPage >= total" @click="page++; load()">Next →</Button>
     </div>
+
+    <AdminUserProgressDialog v-model:open="progressOpen" :user-id="selectedUserId" />
   </div>
 </template>
 
@@ -59,15 +78,22 @@ import { ref, onMounted } from 'vue'
 import adminApi from './api'
 import Card from '../../components/ui/card.vue'
 import Input from '../../components/ui/input.vue'
+import Select from '../../components/ui/select.vue'
+import Badge from '../../components/ui/badge.vue'
 import Button from '../../components/ui/button.vue'
+import AdminUserProgressDialog from './AdminUserProgressDialog.vue'
 import { Search as SearchIcon } from 'lucide-vue-next'
 
 const users  = ref([])
 const total  = ref(0)
 const page   = ref(1)
 const search = ref('')
+const type   = ref('all')
 const loading = ref(false)
 const perPage = 20
+
+const progressOpen = ref(false)
+const selectedUserId = ref(null)
 
 let searchTimer = null
 function onSearch() {
@@ -78,12 +104,19 @@ function onSearch() {
 async function load() {
   loading.value = true
   try {
-    const { data } = await adminApi.get('/users', { params: { page: page.value, search: search.value } })
+    const { data } = await adminApi.get('/users', {
+      params: { page: page.value, search: search.value, type: type.value },
+    })
     users.value = data.users || []
     total.value = data.total
   } finally {
     loading.value = false
   }
+}
+
+function openProgress(u) {
+  selectedUserId.value = u.id
+  progressOpen.value = true
 }
 
 async function deleteUser(u) {
