@@ -6,7 +6,7 @@ export default {
   nav: {
     home: 'Home',
     trainer: 'Trainer',
-    alphabet: 'Alphabet',
+    alphabet: 'First Steps',
     profile: 'Profile',
     settings: 'Settings',
   },
@@ -36,6 +36,7 @@ export default {
     subtitle: 'Journey across England',
     intro: 'Travel city by city. Each city has a new exercise!',
     locked: 'Finish the previous city first',
+    lockedByAlphabet: 'Finish "First Steps" first',
     play: 'Play',
     review: 'Review',
     words: 'words',
@@ -72,7 +73,7 @@ export default {
     openTelegramBot: 'Open bot in Telegram',
   },
   alphabet: {
-    title: 'Alphabet',
+    title: 'First Steps',
     subtitle: 'Put the English alphabet in order',
     intro: 'Slide the letters and arrange them in order — from A to Z!',
     level1Title: 'Letters A–M',

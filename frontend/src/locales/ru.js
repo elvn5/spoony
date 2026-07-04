@@ -6,7 +6,7 @@ export default {
   nav: {
     home: 'Главная',
     trainer: 'Тренажёр',
-    alphabet: 'Алфавит',
+    alphabet: 'Первые шаги',
     profile: 'Профиль',
     settings: 'Настройки',
   },
@@ -36,6 +36,7 @@ export default {
     subtitle: 'Путешествие по Англии',
     intro: 'Проходи города один за другим. В каждом городе — новое упражнение!',
     locked: 'Сначала пройди предыдущий город',
+    lockedByAlphabet: 'Сначала пройди раздел «Первые шаги»',
     play: 'Играть',
     review: 'Повторить',
     words: 'слов',
@@ -72,7 +73,7 @@ export default {
     openTelegramBot: 'Открыть бота в Telegram',
   },
   alphabet: {
-    title: 'Алфавит',
+    title: 'Первые шаги',
     subtitle: 'Собери английский алфавит по порядку',
     intro: 'Передвигай буквы и расставь их по алфавиту — от A до Z!',
     level1Title: 'Буквы A–M',
