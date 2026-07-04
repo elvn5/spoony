@@ -12,7 +12,7 @@ type Level struct {
 	OrderIndex  int    `json:"order_index"`
 	PosX        int    `json:"pos_x"` // 0..100 position on the map
 	PosY        int    `json:"pos_y"`
-	GameType    string `json:"game_type"` // "match" (find the pair) or "word_build" (assemble a word)
+	GameType    string `json:"game_type"` // "match" (find the pair, simple level) or "word_build" (assemble a word, mini-boss level)
 
 	// Per-user fields (filled in when fetched for an authenticated user).
 	Completed bool `json:"completed"`
