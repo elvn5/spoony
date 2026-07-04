@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"log"
 
-	"tma-boilerplate/config"
+	"spoony/config"
 
 	_ "github.com/lib/pq"
 )

@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"tma-boilerplate/config"
+	"spoony/config"
 )
 
 // VerifyTelegramInitData validates the Telegram Web App initData signature.

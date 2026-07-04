@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"tma-boilerplate/config"
-	"tma-boilerplate/database"
+	"spoony/config"
+	"spoony/database"
 
 	"github.com/gin-gonic/gin"
 )

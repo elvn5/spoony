@@ -4,14 +4,14 @@ import (
 	"log"
 	"net/http"
 
-	"tma-boilerplate/config"
-	"tma-boilerplate/database"
-	"tma-boilerplate/features/admin"
-	"tma-boilerplate/features/auth"
-	"tma-boilerplate/features/news"
-	"tma-boilerplate/features/telegrambot"
-	"tma-boilerplate/features/trainer"
-	"tma-boilerplate/middleware"
+	"spoony/config"
+	"spoony/database"
+	"spoony/features/admin"
+	"spoony/features/auth"
+	"spoony/features/news"
+	"spoony/features/telegrambot"
+	"spoony/features/trainer"
+	"spoony/middleware"
 
 	"github.com/gin-gonic/gin"
 )

@@ -3,7 +3,7 @@ package admin
 import (
 	"net/http"
 
-	"tma-boilerplate/config"
+	"spoony/config"
 
 	"github.com/gin-gonic/gin"
 )
