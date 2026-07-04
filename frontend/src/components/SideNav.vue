@@ -29,7 +29,7 @@
 import { h } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { useUserStore } from '../store/user'
+import { useUserStore } from '../features/auth/store'
 import Avatar from './ui/avatar.vue'
 import { Home as HomeIcon, Map as MapIcon, Puzzle as PuzzleIcon, User as UserIcon } from 'lucide-vue-next'
 

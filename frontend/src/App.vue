@@ -21,7 +21,7 @@
 <script setup>
 import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { useUserStore } from './store/user'
+import { useUserStore } from './features/auth/store'
 import { initTelegram } from './services/telegram'
 import SideNav from './components/SideNav.vue'
 import BottomNav from './components/BottomNav.vue'
