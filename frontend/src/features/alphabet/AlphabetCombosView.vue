@@ -29,7 +29,10 @@
         <Volume2Icon class="h-5 w-5 text-primary" />
       </button>
 
-      <p v-if="revealed" class="mt-3 text-lg font-bold text-primary animate-pop">
+      <p
+        class="mt-3 text-lg font-bold text-primary transition-opacity duration-150"
+        :class="revealed ? 'opacity-100 animate-pop' : 'opacity-0'"
+      >
         {{ currentItem.word_ru }}
       </p>
     </div>
