@@ -86,6 +86,12 @@ jobs:
             PORT="${{ secrets.EXPOSE_PORT }}"
             : "${PORT:=80}"
 
+            # Reserved ngrok domain (WEBHOOK_URL minus the scheme) that the
+            # ngrok sidecar tunnels to the app container's port 80.
+            NGROK_DOMAIN="${{ secrets.WEBHOOK_URL }}"
+            NGROK_DOMAIN="${NGROK_DOMAIN#https://}"
+            NGROK_DOMAIN="${NGROK_DOMAIN#http://}"
+
             # Pin to the exact released version for an immutable, rollback-friendly deploy.
             cat > docker-compose.yml << EOF
             services:
@@ -96,6 +102,12 @@ jobs:
                   - "${PORT}:80"
                 volumes:
                   - postgres_data:/var/lib/postgresql/data
+                restart: unless-stopped
+              ngrok:
+                image: ngrok/ngrok:latest
+                command: http app:80 --domain=${NGROK_DOMAIN} --log stdout
+                environment:
+                  - NGROK_AUTHTOKEN=${{ secrets.NGROK_AUTHTOKEN }}
                 restart: unless-stopped
             volumes:
               postgres_data:
