@@ -56,13 +56,19 @@
         :style="{ left: level.pos_x + '%', top: level.pos_y + '%', transform: 'translate(-50%, -50%)' }"
       >
         <button
-          class="relative h-16 w-16 rounded-full flex items-center justify-center text-3xl transition-transform active:scale-95 shadow-lg"
-          :class="nodeClass(level)"
+          class="relative rounded-full flex items-center justify-center transition-transform active:scale-95 shadow-lg"
+          :class="[nodeClass(level), isBoss(level) ? 'h-20 w-20 text-4xl' : 'h-16 w-16 text-3xl']"
           :disabled="!level.unlocked"
           @click="openLevel(level)"
         >
           <span v-if="!level.unlocked" class="text-2xl">🔒</span>
           <span v-else>{{ level.emoji }}</span>
+
+          <!-- mini-boss badge -->
+          <span
+            v-if="isBoss(level)"
+            class="absolute -top-1 -left-1 h-6 w-6 rounded-full bg-amber-400 text-amber-950 flex items-center justify-center text-xs shadow"
+          >👑</span>
 
           <!-- completed check -->
           <span
@@ -121,9 +127,16 @@ const pathD = computed(() => {
     .join(' ')
 })
 
+function isBoss(level) {
+  return level.game_type === 'word_build'
+}
+
 function nodeClass(level) {
   if (level.completed) return 'bg-green-500/15 ring-4 ring-green-500/60'
-  if (level.unlocked) return 'bg-primary text-primary-foreground ring-4 ring-primary/30 animate-bounce-slow'
+  if (level.unlocked) {
+    if (isBoss(level)) return 'bg-amber-400 text-amber-950 ring-4 ring-amber-300 animate-bounce-slow'
+    return 'bg-primary text-primary-foreground ring-4 ring-primary/30 animate-bounce-slow'
+  }
   return 'bg-muted ring-4 ring-border opacity-70 cursor-not-allowed'
 }
 

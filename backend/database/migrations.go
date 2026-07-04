@@ -86,6 +86,7 @@ func seedContent() {
 	seedNews()
 	seedLevels()
 	seedGreetingLevel()
+	seedBossLevels()
 }
 
 func seedNews() {
@@ -199,19 +200,13 @@ func seedLevels() {
 	log.Printf("Seeded %d levels", len(levels))
 }
 
-// seedGreetingLevel inserts the "Greeting and introduction" level at the front
-// of the route. It runs independently of seedLevels so it also backfills
-// databases that were already seeded before this level type existed.
+// seedGreetingLevel inserts the "Hello!" greeting level, the route's first
+// mini-boss. It runs independently of seedLevels so it also backfills
+// databases that were already seeded before this level type existed. Its
+// final order_index/position in the route is assigned by seedBossLevels.
 func seedGreetingLevel() {
-	// Since it's the only level shown on the map right now (the city route is
-	// hidden — see GetLevels), keep it centered. Runs every startup so
-	// already-seeded databases pick up the corrected position too.
-	if _, err := DB.Exec(`UPDATE levels SET pos_x = 50, pos_y = 50 WHERE game_type = 'word_build'`); err != nil {
-		log.Printf("seedGreetingLevel: reposition failed: %v", err)
-	}
-
 	var count int
-	if err := DB.QueryRow(`SELECT COUNT(*) FROM levels WHERE game_type = 'word_build'`).Scan(&count); err != nil {
+	if err := DB.QueryRow(`SELECT COUNT(*) FROM levels WHERE city = 'Hello!'`).Scan(&count); err != nil {
 		log.Printf("seedGreetingLevel: count failed: %v", err)
 		return
 	}
@@ -219,16 +214,11 @@ func seedGreetingLevel() {
 		return
 	}
 
-	if _, err := DB.Exec(`UPDATE levels SET order_index = order_index + 1`); err != nil {
-		log.Printf("seedGreetingLevel: reindex failed: %v", err)
-		return
-	}
-
 	var levelID int
 	err := DB.QueryRow(
 		`INSERT INTO levels (city, title_ru, description, emoji, order_index, pos_x, pos_y, game_type)
-		 VALUES ($1,$2,$3,$4,0,$5,$6,'word_build') RETURNING id`,
-		"Hello!", "Приветствие и знакомство", "Знакомство", "👋", 50, 50,
+		 VALUES ($1,$2,$3,$4,0,50,50,'word_build') RETURNING id`,
+		"Hello!", "Приветствие и знакомство", "Знакомство", "👋",
 	).Scan(&levelID)
 	if err != nil {
 		log.Printf("seedGreetingLevel: insert level failed: %v", err)
@@ -255,4 +245,84 @@ func seedGreetingLevel() {
 		}
 	}
 	log.Printf("Seeded greeting level with %d words", len(words))
+}
+
+// seedBossLevels arranges the England route into groups of two "Find the
+// pair" cities followed by a "Собери слово" mini-boss that recaps their
+// vocabulary, then inserts the three new boss levels the first time this
+// runs. The order_index/position updates are safe to repeat on every startup
+// (e.g. to fix up databases seeded before this grouping existed).
+func seedBossLevels() {
+	type routePos struct{ order, x, y int }
+	route := map[string]routePos{
+		"London":     {0, 50, 92},
+		"Oxford":     {1, 30, 78},
+		"Hello!":     {2, 46, 72},
+		"Cambridge":  {3, 68, 66},
+		"Bristol":    {4, 28, 54},
+		"Stratford":  {6, 64, 44},
+		"Manchester": {7, 38, 32},
+		"Liverpool":  {9, 22, 22},
+		"York":       {10, 58, 10},
+	}
+	for city, p := range route {
+		if _, err := DB.Exec(
+			`UPDATE levels SET order_index = $1, pos_x = $2, pos_y = $3 WHERE city = $4`,
+			p.order, p.x, p.y, city,
+		); err != nil {
+			log.Printf("seedBossLevels: reposition %s failed: %v", city, err)
+		}
+	}
+
+	type vocab struct{ en, ru, emoji string }
+	type boss struct {
+		city, titleRu, desc    string
+		orderIndex, posX, posY int
+		items                  []vocab
+	}
+	bosses := []boss{
+		{"Big Ben", "Биг-Бен", "Повторение: еда и море", 5, 46, 49, []vocab{
+			{"bread", "хлеб", "🍞"}, {"cheese", "сыр", "🧀"}, {"egg", "яйцо", "🥚"},
+			{"fish", "рыба", "🐟"}, {"whale", "кит", "🐳"}, {"crab", "краб", "🦀"},
+		}},
+		{"Tower Bridge", "Тауэрский мост", "Повторение: предметы и спорт", 8, 30, 27, []vocab{
+			{"book", "книга", "📖"}, {"pencil", "карандаш", "✏️"}, {"key", "ключ", "🔑"},
+			{"ball", "мяч", "⚽"}, {"bicycle", "велосипед", "🚲"}, {"trophy", "кубок", "🏆"},
+		}},
+		{"Stonehenge", "Стоунхендж", "Повторение: музыка и погода", 11, 74, 2, []vocab{
+			{"guitar", "гитара", "🎸"}, {"drum", "барабан", "🥁"}, {"piano", "пианино", "🎹"},
+			{"sun", "солнце", "☀️"}, {"rain", "дождь", "🌧️"}, {"snow", "снег", "❄️"},
+		}},
+	}
+
+	for _, b := range bosses {
+		var count int
+		if err := DB.QueryRow(`SELECT COUNT(*) FROM levels WHERE city = $1`, b.city).Scan(&count); err != nil {
+			log.Printf("seedBossLevels: count %s failed: %v", b.city, err)
+			continue
+		}
+		if count > 0 {
+			continue
+		}
+
+		var levelID int
+		err := DB.QueryRow(
+			`INSERT INTO levels (city, title_ru, description, emoji, order_index, pos_x, pos_y, game_type)
+			 VALUES ($1,$2,$3,'👑',$4,$5,$6,'word_build') RETURNING id`,
+			b.city, b.titleRu, b.desc, b.orderIndex, b.posX, b.posY,
+		).Scan(&levelID)
+		if err != nil {
+			log.Printf("seedBossLevels: insert %s failed: %v", b.city, err)
+			continue
+		}
+		for _, v := range b.items {
+			if _, err := DB.Exec(
+				`INSERT INTO vocab_items (level_id, word_en, word_ru, emoji) VALUES ($1,$2,$3,$4)`,
+				levelID, v.en, v.ru, v.emoji,
+			); err != nil {
+				log.Printf("seedBossLevels: insert vocab for %s failed: %v", b.city, err)
+			}
+		}
+	}
+	log.Println("seedBossLevels: route reordered and mini-bosses ensured")
 }

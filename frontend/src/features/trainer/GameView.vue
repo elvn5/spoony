@@ -6,8 +6,11 @@
         <ArrowLeftIcon class="h-5 w-5" />
       </Button>
       <div class="min-w-0">
-        <h1 class="text-lg font-extrabold leading-none truncate">
-          <span class="mr-1">{{ level?.emoji }}</span>{{ level?.city || $t('game.title') }}
+        <h1 class="text-lg font-extrabold leading-none truncate flex items-center gap-1.5">
+          <span>{{ level?.emoji }}</span>{{ level?.city || $t('game.title') }}
+          <span v-if="isWordBuild" class="inline-flex items-center gap-1 rounded-full bg-amber-400 text-amber-950 text-[10px] font-bold px-2 py-0.5 shrink-0">
+            👑 {{ $t('trainer.boss') }}
+          </span>
         </h1>
         <p class="text-muted-foreground text-xs mt-0.5">
           {{ level?.title_ru }} · {{ items.length }} {{ $t('trainer.words') }}
@@ -65,9 +68,9 @@
     <Transition name="fade">
       <div v-if="won" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-6">
         <Card class="w-full max-w-xs p-6 text-center animate-pop">
-          <div class="text-6xl mb-3">🎉</div>
-          <h2 class="text-xl font-extrabold mb-1">{{ $t('game.win') }}</h2>
-          <p class="text-muted-foreground text-sm mb-4">{{ $t('game.winSub') }}</p>
+          <div class="text-6xl mb-3">{{ isWordBuild ? '👑' : '🎉' }}</div>
+          <h2 class="text-xl font-extrabold mb-1">{{ isWordBuild ? $t('game.bossWin') : $t('game.win') }}</h2>
+          <p class="text-muted-foreground text-sm mb-4">{{ isWordBuild ? $t('game.bossWinSub') : $t('game.winSub') }}</p>
 
           <div class="flex justify-center gap-1 mb-5">
             <StarIcon

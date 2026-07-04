@@ -41,6 +41,7 @@ export default {
     review: 'Review',
     words: 'words',
     cityOf: 'City',
+    boss: 'Mini-boss',
   },
   game: {
     title: 'Find the pair',
@@ -50,6 +51,8 @@ export default {
     found: 'Found',
     win: 'Well done! City complete!',
     winSub: 'You learned new English words!',
+    bossWin: 'Boss defeated! 👑',
+    bossWinSub: 'You passed the word challenge!',
     stars: 'stars',
     nextCity: 'Next city',
     backToMap: 'Back to map',

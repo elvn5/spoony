@@ -41,6 +41,7 @@ export default {
     review: 'Повторить',
     words: 'слов',
     cityOf: 'Город',
+    boss: 'Мини-босс',
   },
   game: {
     title: 'Найди пару',
@@ -50,6 +51,8 @@ export default {
     found: 'Найдено',
     win: 'Молодец! Город пройден!',
     winSub: 'Ты выучил новые английские слова!',
+    bossWin: 'Босс повержен! 👑',
+    bossWinSub: 'Ты успешно прошёл проверку слов!',
     stars: 'звёзд',
     nextCity: 'Следующий город',
     backToMap: 'К карте',
