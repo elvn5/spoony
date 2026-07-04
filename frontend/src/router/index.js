@@ -25,6 +25,7 @@ const routes = [
       { path: 'login',     name: 'AdminLogin',     component: () => import('../features/admin/AdminLoginView.vue') },
       { path: 'dashboard', name: 'AdminDashboard', component: () => import('../features/admin/AdminDashboardView.vue'), meta: { requiresAdmin: true } },
       { path: 'users',     name: 'AdminUsers',     component: () => import('../features/admin/AdminUsersView.vue'),     meta: { requiresAdmin: true } },
+      { path: 'content',   name: 'AdminContent',   component: () => import('../features/admin/AdminContentView.vue'),   meta: { requiresAdmin: true } },
     ],
   },
 ]

@@ -5,7 +5,7 @@
       <div class="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
         <div class="flex items-center gap-3">
           <span class="text-xl">⚡</span>
-          <span class="font-semibold text-sm">TMA Boilerplate Admin</span>
+          <span class="font-semibold text-sm">Spoony Admin</span>
         </div>
         <div class="flex items-center gap-1">
           <RouterLink
@@ -45,6 +45,7 @@ const adminStore = useAdminStore()
 const tabs = [
   { to: '/admin/dashboard', icon: '📊', label: 'Dashboard' },
   { to: '/admin/users',     icon: '👤', label: 'Users'     },
+  { to: '/admin/content',   icon: '📰', label: 'Content'   },
 ]
 
 function handleLogout() {

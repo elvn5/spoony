@@ -68,7 +68,15 @@ func main() {
 		{
 			adminAPI.GET("/stats", admin.AdminGetStats)
 			adminAPI.GET("/users", admin.AdminListUsers)
+			adminAPI.GET("/users/:id", admin.AdminGetUser)
 			adminAPI.DELETE("/users/:id", admin.AdminDeleteUser)
+			adminAPI.PUT("/users/:id/progress/:levelId", admin.AdminUpdateUserProgress)
+			adminAPI.DELETE("/users/:id/progress/:levelId", admin.AdminResetUserProgress)
+
+			adminAPI.GET("/news", admin.AdminListNews)
+			adminAPI.POST("/news", admin.AdminCreateNews)
+			adminAPI.PUT("/news/:id", admin.AdminUpdateNews)
+			adminAPI.DELETE("/news/:id", admin.AdminDeleteNews)
 		}
 	}
 
