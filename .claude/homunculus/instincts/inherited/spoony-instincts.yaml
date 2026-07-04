@@ -1,0 +1,393 @@
+# Instincts generated from https://github.com/elvn5/spoony
+# Generated: 2026-07-04T04:59:04.157Z
+# Version: 2.0
+# NOTE: This file supplements (does not replace) any existing curated instincts.
+# High-confidence manually curated instincts should be preserved alongside these.
+
+---
+id: spoony-commit-length
+trigger: "when writing a commit message"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: https://github.com/elvn5/spoony
+---
+
+# Spoony Commit Length
+
+## Action
+
+Write moderate-length commit messages (~87 characters)
+
+## Evidence
+
+- Average commit message length: 87 chars
+- Based on 1 commits
+
+---
+id: spoony-naming-files
+trigger: "when creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/elvn5/spoony
+---
+
+# Spoony Naming Files
+
+## Action
+
+Use camelCase naming convention
+
+## Evidence
+
+- Analyzed file naming patterns in repository
+- Dominant pattern: camelCase
+
+---
+id: spoony-import-relative
+trigger: "when importing modules"
+confidence: 0.75
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/elvn5/spoony
+---
+
+# Spoony Import Relative
+
+## Action
+
+Use relative imports for project files
+
+## Evidence
+
+- Import analysis shows relative import pattern
+- Example: import { x } from '../lib/x'
+
+---
+id: spoony-export-style
+trigger: "when exporting from a module"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/elvn5/spoony
+---
+
+# Spoony Export Style
+
+## Action
+
+Prefer mixed exports
+
+## Evidence
+
+- Export pattern analysis
+- Dominant style: mixed
+
+---
+id: spoony-arch-type-based
+trigger: "when adding new code"
+confidence: 0.8
+domain: architecture
+source: repo-analysis
+source_repo: https://github.com/elvn5/spoony
+---
+
+# Spoony Arch Type Based
+
+## Action
+
+Place code in the appropriate type folder (components/, services/, utils/, etc.)
+
+## Evidence
+
+- Type-based module organization detected
+- Folders: 
+
+---
+id: spoony-test-separate
+trigger: "when writing tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/elvn5/spoony
+---
+
+# Spoony Test Separate
+
+## Action
+
+Place tests in the tests/ or __tests__/ directory, mirroring src structure
+
+## Evidence
+
+- Separate test directory pattern detected
+- Tests live in dedicated test folders
+
+---
+id: spoony-instinct-file-naming
+trigger: "When creating a new file"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: elvn5/spoony
+---
+
+# Spoony Instinct File Naming
+
+## Action
+
+Name the file using camelCase
+
+## Evidence
+
+- Pattern in namingConventions.files
+
+---
+id: spoony-instinct-function-naming
+trigger: "When defining a function"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: elvn5/spoony
+---
+
+# Spoony Instinct Function Naming
+
+## Action
+
+Use camelCase for the function name
+
+## Evidence
+
+- Pattern in namingConventions.functions
+
+---
+id: spoony-instinct-class-naming
+trigger: "When defining a class"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: elvn5/spoony
+---
+
+# Spoony Instinct Class Naming
+
+## Action
+
+Use PascalCase for the class name
+
+## Evidence
+
+- Pattern in namingConventions.classes
+
+---
+id: spoony-instinct-constant-naming
+trigger: "When declaring a constant"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: elvn5/spoony
+---
+
+# Spoony Instinct Constant Naming
+
+## Action
+
+Use SCREAMING_SNAKE_CASE for the constant name
+
+## Evidence
+
+- Pattern in namingConventions.constants
+
+---
+id: spoony-instinct-import-style
+trigger: "When importing modules"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: elvn5/spoony
+---
+
+# Spoony Instinct Import Style
+
+## Action
+
+Use relative import paths
+
+## Evidence
+
+- Pattern in importStyle
+
+---
+id: spoony-instinct-export-style
+trigger: "When exporting modules or functions"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: elvn5/spoony
+---
+
+# Spoony Instinct Export Style
+
+## Action
+
+Use a mixed export style (default and named exports as appropriate)
+
+## Evidence
+
+- Pattern in exportStyle
+
+---
+id: spoony-instinct-error-handling
+trigger: "When handling errors in code"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: elvn5/spoony
+---
+
+# Spoony Instinct Error Handling
+
+## Action
+
+Wrap error-prone code in try-catch blocks
+
+## Evidence
+
+- Pattern in errorHandling.style
+
+---
+id: spoony-instinct-no-custom-errors
+trigger: "When defining error handling logic"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: elvn5/spoony
+---
+
+# Spoony Instinct No Custom Errors
+
+## Action
+
+Do not define custom error classes
+
+## Evidence
+
+- Pattern in errorHandling.customErrorClasses
+
+---
+id: spoony-instinct-no-global-error-handler
+trigger: "When considering global error handling"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: elvn5/spoony
+---
+
+# Spoony Instinct No Global Error Handler
+
+## Action
+
+Do not implement a global error handler
+
+## Evidence
+
+- Pattern in errorHandling.globalHandler
+
+---
+id: spoony-instinct-commit-format-freeform
+trigger: "When writing a commit message"
+confidence: 0.9
+domain: git
+source: repo-analysis
+source_repo: elvn5/spoony
+---
+
+# Spoony Instinct Commit Format Freeform
+
+## Action
+
+Use a freeform commit message without a required prefix
+
+## Evidence
+
+- Pattern in commits.type
+- Example: 'Add guest-to-Telegram account linking, expand Alphabet section, and word lookup popover'
+
+---
+id: spoony-instinct-commit-length
+trigger: "When composing a commit message"
+confidence: 0.7
+domain: git
+source: repo-analysis
+source_repo: elvn5/spoony
+---
+
+# Spoony Instinct Commit Length
+
+## Action
+
+Write a concise message, typically under 100 characters
+
+## Evidence
+
+- Pattern in commits.averageLength
+
+---
+id: spoony-instinct-test-location
+trigger: "When adding or organizing tests"
+confidence: 0.9
+domain: testing
+source: repo-analysis
+source_repo: elvn5/spoony
+---
+
+# Spoony Instinct Test Location
+
+## Action
+
+Place tests in a separate folder from source code
+
+## Evidence
+
+- Pattern in architecture.testLocation
+
+---
+id: spoony-instinct-folder-structure
+trigger: "When organizing codebase folders"
+confidence: 0.8
+domain: architecture
+source: repo-analysis
+source_repo: elvn5/spoony
+---
+
+# Spoony Instinct Folder Structure
+
+## Action
+
+Use a single-package structure with 'frontend' and 'backend' as common folders
+
+## Evidence
+
+- Pattern in architecture.folderStructure.commonFolders
+
+---
+id: spoony-instinct-module-organization
+trigger: "When organizing modules"
+confidence: 0.8
+domain: architecture
+source: repo-analysis
+source_repo: elvn5/spoony
+---
+
+# Spoony Instinct Module Organization
+
+## Action
+
+Organize modules by type
+
+## Evidence
+
+- Pattern in architecture.moduleOrganization
+
