@@ -245,7 +245,8 @@ values that only apply to production go on the `production` environment.
 | `JWT_SECRET`            | Random string, min 32 chars                        |
 | `ADMIN_TOKEN`           | Token for the admin panel (`X-Admin-Token` header) |
 | `MINI_APP_URL`          | Public HTTPS URL of the Mini App frontend          |
-| `WEBHOOK_URL`           | Public HTTPS base URL for Telegram webhook registration |
+| `WEBHOOK_URL`           | Public HTTPS base URL for Telegram webhook registration — also used as the ngrok reserved domain (scheme stripped) |
+| `NGROK_AUTHTOKEN`       | Authtoken for the ngrok sidecar that tunnels the server's port 80 to the `WEBHOOK_URL` domain |
 | `CORS_ALLOWED_ORIGINS`  | Comma-separated allowed origins                    |
 | `EXPOSE_PORT`           | Host port to bind (optional, defaults to `80`)     |
 
