@@ -3,7 +3,7 @@ package news
 import (
 	"net/http"
 
-	"tma-boilerplate/database"
+	"spoony/database"
 
 	"github.com/gin-gonic/gin"
 )

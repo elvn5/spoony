@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"tma-boilerplate/database"
+	"spoony/database"
 
 	"github.com/gin-gonic/gin"
 )

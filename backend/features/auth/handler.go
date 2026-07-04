@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"tma-boilerplate/config"
-	"tma-boilerplate/database"
-	"tma-boilerplate/middleware"
+	"spoony/config"
+	"spoony/database"
+	"spoony/middleware"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"

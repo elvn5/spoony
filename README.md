@@ -19,7 +19,7 @@ The UI adapts to screen size: a bottom tab bar on mobile, and a left **sidebar**
 
 ---
 
-Built on a production-ready boilerplate for Telegram Mini Apps (TMA) with a Go backend, Vue 3 frontend, PostgreSQL, and an admin panel.
+Built with a Go backend, Vue 3 frontend, PostgreSQL, and an admin panel.
 
 ## Tech Stack
 

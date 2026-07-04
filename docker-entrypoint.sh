@@ -11,9 +11,9 @@ if [ ! -f /var/lib/postgresql/data/PG_VERSION ]; then
         -o "-c listen_addresses='localhost'"
 
     su-exec postgres psql -v ON_ERROR_STOP=1 --username=postgres <<-EOSQL
-        CREATE USER tma_user WITH PASSWORD 'tma_password';
-        CREATE DATABASE tma_boilerplate OWNER tma_user;
-        GRANT ALL PRIVILEGES ON DATABASE tma_boilerplate TO tma_user;
+        CREATE USER spoony_user WITH PASSWORD 'spoony_password';
+        CREATE DATABASE spoony OWNER spoony_user;
+        GRANT ALL PRIVILEGES ON DATABASE spoony TO spoony_user;
 EOSQL
 
     su-exec postgres pg_ctl stop -D /var/lib/postgresql/data -w

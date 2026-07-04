@@ -37,7 +37,7 @@ func Load() {
 		Port:                getEnv("PORT", "8080"),
 		Env:                 getEnv("ENV", "development"),
 		LogLevel:            getEnv("LOG_LEVEL", "info"),
-		DatabaseURL:         getEnv("DATABASE_URL", "postgres://tma_user:tma_password@localhost:5432/tma_boilerplate?sslmode=disable"),
+		DatabaseURL:         getEnv("DATABASE_URL", "postgres://spoony_user:spoony_password@localhost:5432/spoony?sslmode=disable"),
 		TelegramBotToken:    getEnv("TELEGRAM_BOT_TOKEN", ""),
 		TelegramBotUsername: getEnv("TELEGRAM_BOT_USERNAME", ""),
 		WebhookURL:          getEnv("WEBHOOK_URL", ""),

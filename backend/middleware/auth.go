@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"tma-boilerplate/config"
+	"spoony/config"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
