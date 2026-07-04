@@ -1,27 +1,27 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { storage } from '../services/storage'
-import { useAdminStore } from '../store/admin'
+import { useAdminStore } from '../features/admin/store'
 
 const routes = [
-  { path: '/',            name: 'Home',     component: () => import('../views/HomeView.vue') },
-  { path: '/trainer',     name: 'Trainer',  component: () => import('../views/TrainerView.vue'), meta: { requiresAuth: true } },
-  { path: '/trainer/:id', name: 'Game',     component: () => import('../views/GameView.vue'),    meta: { requiresAuth: true }, props: true },
-  { path: '/alphabet',     name: 'Alphabet',     component: () => import('../views/AlphabetView.vue'),     meta: { requiresAuth: true } },
-  { path: '/alphabet/:level', name: 'AlphabetGame', component: () => import('../views/AlphabetGameView.vue'), meta: { requiresAuth: true }, props: true },
-  { path: '/alphabet/match/play', name: 'AlphabetMatch', component: () => import('../views/AlphabetMatchView.vue'), meta: { requiresAuth: true } },
-  { path: '/alphabet/words/play', name: 'AlphabetWords', component: () => import('../views/AlphabetWordsView.vue'), meta: { requiresAuth: true } },
-  { path: '/alphabet/combos/:group', name: 'AlphabetCombos', component: () => import('../views/AlphabetCombosView.vue'), meta: { requiresAuth: true }, props: true },
-  { path: '/profile',     name: 'Profile',  component: () => import('../views/ProfileView.vue'),  meta: { requiresAuth: true } },
-  { path: '/settings',    name: 'Settings', component: () => import('../views/SettingsView.vue'), meta: { requiresAuth: true } },
+  { path: '/',            name: 'Home',     component: () => import('../features/news/HomeView.vue') },
+  { path: '/trainer',     name: 'Trainer',  component: () => import('../features/trainer/TrainerView.vue'), meta: { requiresAuth: true } },
+  { path: '/trainer/:id', name: 'Game',     component: () => import('../features/trainer/GameView.vue'),    meta: { requiresAuth: true }, props: true },
+  { path: '/alphabet',     name: 'Alphabet',     component: () => import('../features/alphabet/AlphabetView.vue'),     meta: { requiresAuth: true } },
+  { path: '/alphabet/:level', name: 'AlphabetGame', component: () => import('../features/alphabet/AlphabetGameView.vue'), meta: { requiresAuth: true }, props: true },
+  { path: '/alphabet/match/play', name: 'AlphabetMatch', component: () => import('../features/alphabet/AlphabetMatchView.vue'), meta: { requiresAuth: true } },
+  { path: '/alphabet/words/play', name: 'AlphabetWords', component: () => import('../features/alphabet/AlphabetWordsView.vue'), meta: { requiresAuth: true } },
+  { path: '/alphabet/combos/:group', name: 'AlphabetCombos', component: () => import('../features/alphabet/AlphabetCombosView.vue'), meta: { requiresAuth: true }, props: true },
+  { path: '/profile',     name: 'Profile',  component: () => import('../features/profile/ProfileView.vue'),  meta: { requiresAuth: true } },
+  { path: '/settings',    name: 'Settings', component: () => import('../features/settings/SettingsView.vue'), meta: { requiresAuth: true } },
 
   {
     path: '/admin',
-    component: () => import('../views/admin/AdminLayout.vue'),
+    component: () => import('../features/admin/AdminLayout.vue'),
     children: [
       { path: '',          redirect: '/admin/login' },
-      { path: 'login',     name: 'AdminLogin',     component: () => import('../views/admin/AdminLoginView.vue') },
-      { path: 'dashboard', name: 'AdminDashboard', component: () => import('../views/admin/AdminDashboardView.vue'), meta: { requiresAdmin: true } },
-      { path: 'users',     name: 'AdminUsers',     component: () => import('../views/admin/AdminUsersView.vue'),     meta: { requiresAdmin: true } },
+      { path: 'login',     name: 'AdminLogin',     component: () => import('../features/admin/AdminLoginView.vue') },
+      { path: 'dashboard', name: 'AdminDashboard', component: () => import('../features/admin/AdminDashboardView.vue'), meta: { requiresAdmin: true } },
+      { path: 'users',     name: 'AdminUsers',     component: () => import('../features/admin/AdminUsersView.vue'),     meta: { requiresAdmin: true } },
     ],
   },
 ]

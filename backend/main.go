@@ -6,7 +6,11 @@ import (
 
 	"tma-boilerplate/config"
 	"tma-boilerplate/database"
-	"tma-boilerplate/handlers"
+	"tma-boilerplate/features/admin"
+	"tma-boilerplate/features/auth"
+	"tma-boilerplate/features/news"
+	"tma-boilerplate/features/telegrambot"
+	"tma-boilerplate/features/trainer"
 	"tma-boilerplate/middleware"
 
 	"github.com/gin-gonic/gin"
@@ -32,43 +36,43 @@ func main() {
 	api := r.Group("/api")
 
 	// Auth routes
-	auth := api.Group("/auth")
+	authGroup := api.Group("/auth")
 	{
-		auth.POST("/telegram-login", handlers.TelegramLogin)
-		auth.POST("/guest", handlers.GuestLogin)
-		auth.POST("/logout", handlers.Logout)
-		auth.GET("/me", middleware.AuthRequired(), handlers.GetMe)
-		auth.PUT("/profile", middleware.AuthRequired(), handlers.UpdateProfile)
+		authGroup.POST("/telegram-login", auth.TelegramLogin)
+		authGroup.POST("/guest", auth.GuestLogin)
+		authGroup.POST("/logout", auth.Logout)
+		authGroup.GET("/me", middleware.AuthRequired(), auth.GetMe)
+		authGroup.PUT("/profile", middleware.AuthRequired(), auth.UpdateProfile)
 	}
 
 	// Spoony learning content
-	api.GET("/news", handlers.GetNews)
+	api.GET("/news", news.GetNews)
 
 	learn := api.Group("", middleware.AuthRequired())
 	{
-		learn.GET("/levels", handlers.GetLevels)
-		learn.GET("/levels/:id/cards", handlers.GetLevelCards)
-		learn.POST("/levels/:id/complete", handlers.CompleteLevel)
-		learn.GET("/stats", handlers.GetUserStats)
+		learn.GET("/levels", trainer.GetLevels)
+		learn.GET("/levels/:id/cards", trainer.GetLevelCards)
+		learn.POST("/levels/:id/complete", trainer.CompleteLevel)
+		learn.GET("/stats", trainer.GetUserStats)
 	}
 
 	// Telegram webhook (no auth — called by Telegram servers)
-	api.POST("/webhook/telegram", handlers.HandleWebhook)
-	api.GET("/webhook/info", handlers.GetWebhookInfo)
-	api.GET("/telegram/bot-info", handlers.GetBotInfo)
+	api.POST("/webhook/telegram", telegrambot.HandleWebhook)
+	api.GET("/webhook/info", telegrambot.GetWebhookInfo)
+	api.GET("/telegram/bot-info", telegrambot.GetBotInfo)
 
 	// Admin API
-	admin := r.Group("/admin")
+	adminGroup := r.Group("/admin")
 	{
-		adminAPI := admin.Group("/api", middleware.AdminAuth())
+		adminAPI := adminGroup.Group("/api", admin.Auth())
 		{
-			adminAPI.GET("/stats", handlers.AdminGetStats)
-			adminAPI.GET("/users", handlers.AdminListUsers)
-			adminAPI.DELETE("/users/:id", handlers.AdminDeleteUser)
+			adminAPI.GET("/stats", admin.AdminGetStats)
+			adminAPI.GET("/users", admin.AdminListUsers)
+			adminAPI.DELETE("/users/:id", admin.AdminDeleteUser)
 		}
 	}
 
-	if err := handlers.RegisterWebhook(); err != nil {
+	if err := telegrambot.RegisterWebhook(); err != nil {
 		log.Printf("Warning: Telegram webhook registration failed: %v", err)
 	}
 

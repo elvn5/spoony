@@ -25,6 +25,73 @@
 
 ---
 
+## Правила разработки (постоянные, не устаревают с новыми записями ниже)
+
+**Вся бизнес-логика фич — только в папке `features/`, и в backend, и в frontend.**
+Новый код для новой фичи создавать сразу внутри `features/<название>/`, ничего не класть
+рядом в старые "технические" папки (`handlers/`, `models/`, `views/`, `store/` и т.п. — они
+остаются только для инфраструктуры, общей для всех фич).
+
+Backend (`backend/features/<name>/`, package = `<name>`):
+- `handler.go` — HTTP-хендлеры (Gin), `model.go` — структуры данных фичи.
+- Общее/инфраструктурное — вне `features/`: `config/`, `database/` (подключение + миграции),
+  `middleware/` (только по-настоящему сквозные вещи вроде CORS и JWT-парсинга — `AuthRequired`).
+  Если middleware специфичен для одной фичи (пример: `AdminAuth`) — он живёт внутри той фичи, не в `middleware/`.
+- `main.go` знает про все фичи и просто их монтирует — сам бизнес-логики не содержит.
+
+Frontend (`frontend/src/features/<name>/`):
+- Внутри фичи: её `*View.vue` (страницы), `api.js` (обёртка над HTTP-эндпоинтами фичи),
+  `store.js` (если есть Pinia store), и `components/` для компонентов, специфичных только для неё.
+- Общее/переиспользуемое — вне `features/`: `components/` (в т.ч. `components/ui/` — примитивы
+  shadcn-vue, и `components/games/` — виджеты, используемые несколькими фичами, например
+  `WordBuildGame.vue` используется и trainer, и alphabet), `services/` (http-клиент, telegram SDK,
+  storage, tts — всё, чем пользуются 2+ фичи), `store/ui.js`, `data/dictionary.js` (используется
+  глобальным `WordLookupPopover.vue`), `router/`, `locales/`, `utils/`.
+- Если что-то нужно ДВУМ и более фичам — это не бизнес-логика одной фичи, кладётся в общую папку,
+  а не дублируется/не импортируется из чужого `features/другая-фича/`.
+
+---
+
+## 2026-07-04 — Рефакторинг на feature-based структуру
+
+Полный перенос существующего кода (backend + frontend) в `features/` по просьбе пользователя,
+который заметил отсутствие такой папки при просмотре проекта. Сделано сразу, не только как
+правило на будущее.
+
+**Backend** (`backend/features/{auth,news,trainer,telegrambot,admin}/`):
+- `auth` — TelegramLogin/GuestLogin/Logout/GetMe/UpdateProfile + `VerifyTelegramInitData` (был
+  отдельный пакет `services/`, слит внутрь auth, т.к. используется только там).
+- `news` — GetNews (раньше был свален в один файл с trainer-хендлерами, `NewsPost` переименован
+  в `Post` внутри пакета news, чтобы не было тавтологии `news.NewsPost`).
+- `trainer` — GetLevels/GetLevelCards/CompleteLevel/GetUserStats.
+- `telegrambot` — вебхук, регистрация вебхука, /telegram/bot-info, привязка гостя к Telegram.
+- `admin` — статистика/список/удаление пользователей + `Auth()` (был `middleware.AdminAuth`,
+  переехал внутрь фичи и в admin package, т.к. специфичен только ей).
+- Старые `backend/handlers/`, `backend/models/`, `backend/services/` удалены (пустые после переноса).
+- `middleware/` и `database/` остались как общая инфраструктура (JWT-парсинг и CORS используются
+  всеми фичами; миграции/сид-данные — общая схема для всех таблиц сразу, не разделены по фичам).
+- Проверено: `go build ./...`, `go vet ./...`, `gofmt -l .`, `go test ./...` — всё чисто.
+
+**Frontend** (`frontend/src/features/{auth,news,trainer,alphabet,profile,settings,admin}/`):
+- `views/` полностью упразднена — все страницы переехали в соответствующие фичи.
+- `services/api.js` (один файл на все домены) разделён: общий http-клиент → `services/httpClient.js`,
+  а `authApi`/`newsApi`/`trainerApi`/`telegramApi` — по `api.js` внутри своих фич.
+- Из `HomeView.vue` (фича news) вынесена карточка логина в `features/auth/components/LoginCard.vue`
+  (бизнес-логика входа гостя/telegram не должна жить в news-странице).
+- `WordBuildGame.vue` переехал не в фичу, а в `components/games/` — он общий для trainer
+  (уровень "Приветствие") и alphabet ("Собери слово").
+- `alphabetProgress.js`, `greetingWords.js`, `phonicsWords.js` переехали внутрь `features/alphabet/`
+  (использовались только там).
+- Проверено: `npm run build` (чисто, все чанки собрались), плюс ручной прогон в браузере по всем
+  маршрутам (home/trainer/alphabet × все 10 уровней/profile/settings/admin) — без ошибок в консоли.
+
+**Что не переносил:** `database/migrations.go` остаётся одним файлом на все таблицы (это схема, не
+бизнес-логика конкретной фичи) — не разбивал по фичам, чтобы не усложнять миграции.
+
+Изменения на ветке `refactor/feature-based-architecture`, ещё не в PR/main на момент записи.
+
+---
+
 ## 2026-07-01 — Текущее состояние (снято на старте сессии)
 
 Репозиторий имеет один коммит `chore: initial commit`, поверх которого лежит большой объём незакоммиченных изменений — по сути, это первая реализация фичи "Spoony" поверх голого TMA-боилерплейта.
