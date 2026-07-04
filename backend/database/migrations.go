@@ -249,21 +249,24 @@ func seedGreetingLevel() {
 
 // seedBossLevels arranges the England route into groups of two "Find the
 // pair" cities followed by a "Собери слово" mini-boss that recaps their
-// vocabulary, then inserts the three new boss levels the first time this
-// runs. The order_index/position updates are safe to repeat on every startup
-// (e.g. to fix up databases seeded before this grouping existed).
+// vocabulary (each boss's words are a subset of the two levels right before
+// it, except "Hello!", which opens the whole route and so has nothing to
+// recap — same as London opening the first "Find the pair" group). It then
+// inserts any boss levels that don't exist yet. The order_index/position
+// updates are safe to repeat on every startup (e.g. to fix up databases
+// seeded before this grouping existed).
 func seedBossLevels() {
 	type routePos struct{ order, x, y int }
 	route := map[string]routePos{
-		"London":     {0, 50, 92},
-		"Oxford":     {1, 30, 78},
-		"Hello!":     {2, 46, 72},
-		"Cambridge":  {3, 68, 66},
-		"Bristol":    {4, 28, 54},
-		"Stratford":  {6, 64, 44},
-		"Manchester": {7, 38, 32},
-		"Liverpool":  {9, 22, 22},
-		"York":       {10, 58, 10},
+		"Hello!":     {0, 50, 99},
+		"London":     {1, 50, 92},
+		"Oxford":     {2, 30, 78},
+		"Cambridge":  {4, 68, 66},
+		"Bristol":    {5, 28, 54},
+		"Stratford":  {7, 64, 44},
+		"Manchester": {8, 38, 32},
+		"Liverpool":  {10, 22, 22},
+		"York":       {11, 58, 10},
 	}
 	for city, p := range route {
 		if _, err := DB.Exec(
@@ -281,15 +284,19 @@ func seedBossLevels() {
 		items                  []vocab
 	}
 	bosses := []boss{
-		{"Big Ben", "Биг-Бен", "Повторение: еда и море", 5, 46, 49, []vocab{
+		{"Windsor Castle", "Виндзорский замок", "Повторение: фрукты и животные", 3, 46, 72, []vocab{
+			{"apple", "яблоко", "🍎"}, {"banana", "банан", "🍌"}, {"orange", "апельсин", "🍊"},
+			{"cat", "кошка", "🐱"}, {"dog", "собака", "🐶"}, {"fox", "лиса", "🦊"},
+		}},
+		{"Big Ben", "Биг-Бен", "Повторение: еда и море", 6, 46, 49, []vocab{
 			{"bread", "хлеб", "🍞"}, {"cheese", "сыр", "🧀"}, {"egg", "яйцо", "🥚"},
 			{"fish", "рыба", "🐟"}, {"whale", "кит", "🐳"}, {"crab", "краб", "🦀"},
 		}},
-		{"Tower Bridge", "Тауэрский мост", "Повторение: предметы и спорт", 8, 30, 27, []vocab{
+		{"Tower Bridge", "Тауэрский мост", "Повторение: предметы и спорт", 9, 30, 27, []vocab{
 			{"book", "книга", "📖"}, {"pencil", "карандаш", "✏️"}, {"key", "ключ", "🔑"},
 			{"ball", "мяч", "⚽"}, {"bicycle", "велосипед", "🚲"}, {"trophy", "кубок", "🏆"},
 		}},
-		{"Stonehenge", "Стоунхендж", "Повторение: музыка и погода", 11, 74, 2, []vocab{
+		{"Stonehenge", "Стоунхендж", "Повторение: музыка и погода", 12, 74, 2, []vocab{
 			{"guitar", "гитара", "🎸"}, {"drum", "барабан", "🥁"}, {"piano", "пианино", "🎹"},
 			{"sun", "солнце", "☀️"}, {"rain", "дождь", "🌧️"}, {"snow", "снег", "❄️"},
 		}},
