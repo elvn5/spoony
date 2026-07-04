@@ -10,8 +10,8 @@
 
     <nav class="flex flex-col gap-1.5">
       <SideItem to="/"         :icon="HomeIcon"   :label="t('nav.home')" />
-      <SideItem to="/trainer"  :icon="MapIcon"    :label="t('nav.trainer')" />
       <SideItem to="/alphabet" :icon="PuzzleIcon" :label="t('nav.alphabet')" />
+      <SideItem to="/trainer"  :icon="MapIcon"    :label="t('nav.trainer')" :locked="trainerLocked" />
       <SideItem to="/profile"  :icon="UserIcon"   :label="t('nav.profile')" />
     </nav>
 
@@ -26,19 +26,41 @@
 </template>
 
 <script setup>
-import { h } from 'vue'
+import { h, computed } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useUserStore } from '../features/auth/store'
 import Avatar from './ui/avatar.vue'
-import { Home as HomeIcon, Map as MapIcon, Puzzle as PuzzleIcon, User as UserIcon } from 'lucide-vue-next'
+import { isAlphabetCompleted } from '../features/alphabet/progress'
+import { hapticFeedback, showAlert } from '../services/telegram'
+import { Home as HomeIcon, Map as MapIcon, Puzzle as PuzzleIcon, User as UserIcon, Lock as LockIcon } from 'lucide-vue-next'
 
 const { t } = useI18n()
 const userStore = useUserStore()
+const route = useRoute()
+const trainerLocked = computed(() => {
+  route.fullPath // recompute on every navigation
+  return !isAlphabetCompleted()
+})
 
-function SideItem({ to, icon, label }) {
+function SideItem({ to, icon, label, locked }) {
   const route = useRoute()
   const isActive = to === '/' ? route.path === '/' : route.path.startsWith(to)
+
+  if (locked) {
+    return h('button', {
+      type: 'button',
+      class: 'flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm text-muted-foreground opacity-50 cursor-not-allowed',
+      onClick: () => {
+        hapticFeedback('rigid')
+        showAlert(t('trainer.lockedByAlphabet'))
+      },
+    }, [
+      h(icon, { class: 'h-5 w-5 shrink-0' }),
+      h('span', label),
+      h(LockIcon, { class: 'h-3.5 w-3.5 ml-auto shrink-0' }),
+    ])
+  }
 
   return h(RouterLink, {
     to,
@@ -51,5 +73,5 @@ function SideItem({ to, icon, label }) {
     h('span', label),
   ])
 }
-SideItem.props = ['to', 'icon', 'label']
+SideItem.props = ['to', 'icon', 'label', 'locked']
 </script>
