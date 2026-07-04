@@ -43,4 +43,8 @@ export const learnApi = {
   getStats: () => api.get('/stats'),
 }
 
+export const telegramApi = {
+  getBotInfo: () => api.get('/telegram/bot-info'),
+}
+
 export default api

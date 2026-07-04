@@ -14,6 +14,7 @@ type Config struct {
 	LogLevel            string
 	DatabaseURL         string
 	TelegramBotToken    string
+	TelegramBotUsername string
 	WebhookURL          string
 	NgrokAPIURL         string
 	JWTSecret           string
@@ -38,6 +39,7 @@ func Load() {
 		LogLevel:            getEnv("LOG_LEVEL", "info"),
 		DatabaseURL:         getEnv("DATABASE_URL", "postgres://tma_user:tma_password@localhost:5432/tma_boilerplate?sslmode=disable"),
 		TelegramBotToken:    getEnv("TELEGRAM_BOT_TOKEN", ""),
+		TelegramBotUsername: getEnv("TELEGRAM_BOT_USERNAME", ""),
 		WebhookURL:          getEnv("WEBHOOK_URL", ""),
 		NgrokAPIURL:         getEnv("NGROK_API_URL", ""),
 		JWTSecret:           getEnv("JWT_SECRET", "change-this-in-production-min-32-chars"),

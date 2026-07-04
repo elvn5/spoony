@@ -8,6 +8,9 @@ const routes = [
   { path: '/trainer/:id', name: 'Game',     component: () => import('../views/GameView.vue'),    meta: { requiresAuth: true }, props: true },
   { path: '/alphabet',     name: 'Alphabet',     component: () => import('../views/AlphabetView.vue'),     meta: { requiresAuth: true } },
   { path: '/alphabet/:level', name: 'AlphabetGame', component: () => import('../views/AlphabetGameView.vue'), meta: { requiresAuth: true }, props: true },
+  { path: '/alphabet/match/play', name: 'AlphabetMatch', component: () => import('../views/AlphabetMatchView.vue'), meta: { requiresAuth: true } },
+  { path: '/alphabet/words/play', name: 'AlphabetWords', component: () => import('../views/AlphabetWordsView.vue'), meta: { requiresAuth: true } },
+  { path: '/alphabet/combos/:group', name: 'AlphabetCombos', component: () => import('../views/AlphabetCombosView.vue'), meta: { requiresAuth: true }, props: true },
   { path: '/profile',     name: 'Profile',  component: () => import('../views/ProfileView.vue'),  meta: { requiresAuth: true } },
   { path: '/settings',    name: 'Settings', component: () => import('../views/SettingsView.vue'), meta: { requiresAuth: true } },
 

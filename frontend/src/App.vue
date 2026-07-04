@@ -14,6 +14,7 @@
 
     <BottomNav v-if="showShell" />
     <NotificationStack />
+    <WordLookupPopover />
   </div>
 </template>
 
@@ -25,6 +26,7 @@ import { initTelegram } from './services/telegram'
 import SideNav from './components/SideNav.vue'
 import BottomNav from './components/BottomNav.vue'
 import NotificationStack from './components/NotificationStack.vue'
+import WordLookupPopover from './components/WordLookupPopover.vue'
 
 const route = useRoute()
 const userStore = useUserStore()

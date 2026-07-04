@@ -7,9 +7,11 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"tma-boilerplate/config"
+	"tma-boilerplate/database"
 
 	"github.com/gin-gonic/gin"
 )
@@ -55,7 +57,40 @@ func HandleWebhook(c *gin.Context) {
 }
 
 func handleMessage(msg *TelegramMessage) {
+	// A guest who tapped the "Continue in Telegram" link on the website
+	// arrives here as "/start <guest_id>" — link their web progress to
+	// this Telegram account before replying.
+	if guestID, ok := startPayload(msg.Text); ok {
+		linkGuestAccount(guestID, msg.From)
+	}
 	sendWelcome(msg.Chat.ID, msg.From.FirstName)
+}
+
+// startPayload extracts the deep-link payload from a "/start <payload>" command.
+func startPayload(text string) (string, bool) {
+	text = strings.TrimSpace(text)
+	if !strings.HasPrefix(text, "/start") {
+		return "", false
+	}
+	payload := strings.TrimSpace(strings.TrimPrefix(text, "/start"))
+	if payload == "" || len(payload) > 64 {
+		return "", false
+	}
+	return payload, true
+}
+
+// linkGuestAccount attaches a Telegram identity to a guest account created on
+// the website, so the guest's progress carries over instead of starting a
+// brand-new account. It's a no-op if the guest is already linked or unknown.
+func linkGuestAccount(guestID string, from TelegramUser) {
+	_, err := database.DB.Exec(`
+		UPDATE users SET telegram_id = $1, username = $2, first_name = $3, updated_at = NOW()
+		WHERE guest_id = $4 AND telegram_id IS NULL`,
+		from.ID, from.Username, from.FirstName, guestID,
+	)
+	if err != nil {
+		log.Printf("linkGuestAccount: failed to link guest %s: %v", guestID, err)
+	}
 }
 
 // ---- Message builders ----
@@ -153,6 +188,12 @@ func RegisterWebhook() error {
 
 	log.Printf("Telegram webhook registered: %s", webhookURL)
 	return nil
+}
+
+// GetBotInfo exposes the bot username so the frontend can build a
+// "https://t.me/<username>" deep link — no auth needed, it's public info.
+func GetBotInfo(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"username": config.App.TelegramBotUsername})
 }
 
 // GetWebhookInfo returns current webhook status.

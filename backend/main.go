@@ -55,6 +55,7 @@ func main() {
 	// Telegram webhook (no auth — called by Telegram servers)
 	api.POST("/webhook/telegram", handlers.HandleWebhook)
 	api.GET("/webhook/info", handlers.GetWebhookInfo)
+	api.GET("/telegram/bot-info", handlers.GetBotInfo)
 
 	// Admin API
 	admin := r.Group("/admin")
