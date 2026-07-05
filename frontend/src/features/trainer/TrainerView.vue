@@ -57,16 +57,16 @@
       >
         <button
           class="relative rounded-full flex items-center justify-center transition-transform active:scale-95 shadow-lg"
-          :class="[nodeClass(level), isBoss(level) ? 'h-20 w-20 text-4xl' : 'h-16 w-16 text-3xl']"
+          :class="[nodeClass(level), isBoss(level) ? 'h-20 w-20 text-4xl' : 'h-16 w-16 text-3xl', level.unlocked ? '' : 'blur-[2px]']"
           :disabled="!level.unlocked"
           @click="openLevel(level)"
         >
-          <span v-if="!level.unlocked" class="text-2xl">🔒</span>
+          <span v-if="!level.unlocked" class="text-2xl">🌫️</span>
           <span v-else>{{ level.emoji }}</span>
 
-          <!-- mini-boss badge -->
+          <!-- mini-boss badge: hidden by the fog until the level unlocks -->
           <span
-            v-if="isBoss(level)"
+            v-if="isBoss(level) && level.unlocked"
             class="absolute -top-1 -left-1 h-6 w-6 rounded-full bg-amber-400 text-amber-950 flex items-center justify-center text-xs shadow"
           >👑</span>
 
@@ -77,8 +77,8 @@
           >✓</span>
         </button>
 
-        <!-- label -->
-        <div class="mt-1.5 text-center">
+        <!-- label: fogged (blurred) while the level is locked -->
+        <div class="mt-1.5 text-center" :class="level.unlocked ? '' : 'blur-[4px] select-none opacity-60'">
           <p class="text-xs font-bold leading-none" :class="level.unlocked ? 'text-foreground' : 'text-muted-foreground'">
             {{ level.city }}
           </p>
