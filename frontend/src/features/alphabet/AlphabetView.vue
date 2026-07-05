@@ -21,11 +21,12 @@
           class="h-14 w-14 shrink-0 rounded-2xl flex items-center justify-center text-2xl font-extrabold"
           :class="lvl.completed ? 'bg-green-500/15 text-green-600' : lvl.unlocked ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'"
         >
-          <span v-if="!lvl.unlocked">🔒</span>
+          <span v-if="!lvl.unlocked">🌫️</span>
           <span v-else-if="lvl.completed">✓</span>
           <span v-else>{{ lvl.id }}</span>
         </div>
-        <div class="min-w-0 flex-1">
+        <!-- Fogged (blurred) while the level is locked -->
+        <div class="min-w-0 flex-1" :class="lvl.unlocked ? '' : 'blur-[4px] select-none opacity-60'">
           <p class="font-bold truncate">{{ lvl.title }}</p>
           <p class="text-xs text-muted-foreground mt-0.5">{{ lvl.range }}</p>
         </div>
