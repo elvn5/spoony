@@ -2,7 +2,7 @@
   <Dialog :open="open" @update:open="$emit('update:open', $event)" title="User progress" :description="subtitle">
     <div v-if="loading" class="py-8 text-center text-muted-foreground text-sm">Loading…</div>
     <div v-else-if="!detail" class="py-8 text-center text-destructive text-sm">Failed to load user</div>
-    <div v-else class="space-y-4">
+    <div v-else class="space-y-4 min-w-0">
       <div class="rounded-xl border border-border bg-secondary/40 p-3 text-sm">
         <p class="font-medium">{{ detail.user.first_name }} {{ detail.user.last_name }}</p>
         <p class="text-xs text-muted-foreground mt-0.5">
