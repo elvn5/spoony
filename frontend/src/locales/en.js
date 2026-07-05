@@ -85,6 +85,10 @@ export default {
     continueInTelegram: 'Continue in Telegram',
     continueInTelegramHint: "Open our bot in Telegram — all your progress carries over, and you can keep playing right there!",
     openTelegramBot: 'Open bot in Telegram',
+    soundTest: 'Sound test',
+    soundTestHint: "If games are silent for you, test here — it'll help pin down why.",
+    soundTestTone: 'Test tone',
+    soundTestSpeech: 'Test word playback',
   },
   alphabet: {
     title: 'First Steps',

@@ -85,6 +85,10 @@ export default {
     continueInTelegram: 'Продолжить в Telegram',
     continueInTelegramHint: 'Открой нашего бота в Telegram — весь твой прогресс сохранится, и играть можно будет прямо там!',
     openTelegramBot: 'Открыть бота в Telegram',
+    soundTest: 'Проверка звука',
+    soundTestHint: 'Если в играх не слышно звука, проверь тут — это поможет найти причину.',
+    soundTestTone: 'Тестовый сигнал',
+    soundTestSpeech: 'Тест озвучки слова',
   },
   alphabet: {
     title: 'Первые шаги',
