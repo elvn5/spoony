@@ -42,6 +42,15 @@ export default {
     words: 'words',
     cityOf: 'City',
     boss: 'Mini-boss',
+    theory: 'Theory',
+    cards: 'cards',
+  },
+  theory: {
+    cardOf: 'Card {current} of {total}',
+    done: 'Got it!',
+  },
+  sentenceBuild: {
+    hint: 'Build the sentence from the words in order!',
   },
   game: {
     title: 'Find the pair',
@@ -53,6 +62,8 @@ export default {
     winSub: 'You learned new English words!',
     bossWin: 'Boss defeated! 👑',
     bossWinSub: 'You passed the word challenge!',
+    theoryWin: 'Theory complete!',
+    theoryWinSub: 'Now put it into practice!',
     stars: 'stars',
     nextCity: 'Next city',
     backToMap: 'Back to map',

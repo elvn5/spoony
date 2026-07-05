@@ -128,7 +128,7 @@ const pathD = computed(() => {
 })
 
 function isBoss(level) {
-  return level.game_type === 'word_build'
+  return level.game_type === 'word_build' || level.game_type === 'sentence_build'
 }
 
 function nodeClass(level) {
