@@ -8,12 +8,17 @@
       <div class="min-w-0">
         <h1 class="text-lg font-extrabold leading-none truncate flex items-center gap-1.5">
           <span>{{ level?.emoji }}</span>{{ level?.city || $t('game.title') }}
-          <span v-if="isWordBuild" class="inline-flex items-center gap-1 rounded-full bg-amber-400 text-amber-950 text-[10px] font-bold px-2 py-0.5 shrink-0">
+          <span v-if="isBoss" class="inline-flex items-center gap-1 rounded-full bg-amber-400 text-amber-950 text-[10px] font-bold px-2 py-0.5 shrink-0">
             👑 {{ $t('trainer.boss') }}
+          </span>
+          <span v-else-if="isTheory" class="inline-flex items-center gap-1 rounded-full bg-secondary text-foreground text-[10px] font-bold px-2 py-0.5 shrink-0">
+            📖 {{ $t('trainer.theory') }}
           </span>
         </h1>
         <p class="text-muted-foreground text-xs mt-0.5">
-          {{ level?.title_ru }} · {{ items.length }} {{ $t('trainer.words') }}
+          {{ level?.title_ru }} ·
+          <template v-if="isTheory">{{ theorySlides.length }} {{ $t('trainer.cards') }}</template>
+          <template v-else>{{ items.length }} {{ $t('trainer.words') }}</template>
         </p>
       </div>
     </header>
@@ -22,6 +27,22 @@
     <div v-if="loading" class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">
       <div v-for="n in 12" :key="n" class="aspect-square rounded-2xl bg-muted animate-pulse" />
     </div>
+
+    <!-- Theory level: short grammar cards -->
+    <TheoryLesson
+      v-else-if="isTheory"
+      :key="restartKey"
+      :slides="theorySlides"
+      @complete="finish"
+    />
+
+    <!-- Sentence-build boss: assemble a sentence from learned words -->
+    <SentenceBuildGame
+      v-else-if="isSentenceBuild"
+      :key="restartKey"
+      :items="items"
+      @complete="finish"
+    />
 
     <!-- Word-build exercise (e.g. greeting & introduction level) -->
     <WordBuildGame
@@ -68,9 +89,13 @@
     <Transition name="fade">
       <div v-if="won" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-6">
         <Card class="w-full max-w-xs p-6 text-center animate-pop">
-          <div class="text-6xl mb-3">{{ isWordBuild ? '👑' : '🎉' }}</div>
-          <h2 class="text-xl font-extrabold mb-1">{{ isWordBuild ? $t('game.bossWin') : $t('game.win') }}</h2>
-          <p class="text-muted-foreground text-sm mb-4">{{ isWordBuild ? $t('game.bossWinSub') : $t('game.winSub') }}</p>
+          <div class="text-6xl mb-3">{{ isBoss ? '👑' : isTheory ? '📖' : '🎉' }}</div>
+          <h2 class="text-xl font-extrabold mb-1">
+            {{ isBoss ? $t('game.bossWin') : isTheory ? $t('game.theoryWin') : $t('game.win') }}
+          </h2>
+          <p class="text-muted-foreground text-sm mb-4">
+            {{ isBoss ? $t('game.bossWinSub') : isTheory ? $t('game.theoryWinSub') : $t('game.winSub') }}
+          </p>
 
           <div class="flex justify-center gap-1 mb-5">
             <StarIcon
@@ -107,6 +132,8 @@ import { speakWord, stopSpeaking } from '../../services/tts'
 import Button from '../../components/ui/button.vue'
 import Card from '../../components/ui/card.vue'
 import WordBuildGame from '../../components/games/WordBuildGame.vue'
+import SentenceBuildGame from '../../components/games/SentenceBuildGame.vue'
+import TheoryLesson from '../../components/games/TheoryLesson.vue'
 import { ArrowLeft as ArrowLeftIcon, ArrowRight as ArrowRightIcon, Star as StarIcon } from 'lucide-vue-next'
 
 const props = defineProps({ id: { type: [String, Number], required: true } })
@@ -125,8 +152,13 @@ const won = ref(false)
 const finalStars = ref(1)
 const restartKey = ref(0)
 
+const theorySlides = ref([])
+
 const level = computed(() => levels.value.find(l => String(l.id) === String(props.id)))
 const isWordBuild = computed(() => level.value?.game_type === 'word_build')
+const isSentenceBuild = computed(() => level.value?.game_type === 'sentence_build')
+const isTheory = computed(() => level.value?.game_type === 'theory')
+const isBoss = computed(() => isWordBuild.value || isSentenceBuild.value)
 const nextLevel = computed(() => {
   if (!level.value) return null
   return levels.value.find(l => l.order_index === level.value.order_index + 1) || null
@@ -241,15 +273,22 @@ async function load() {
   loading.value = true
   won.value = false
   try {
-    const [cardsRes, levelsRes] = await Promise.all([
-      trainerApi.getCards(props.id),
-      trainerApi.getLevels(),
-    ])
-    items.value = cardsRes.data || []
+    // Level info first — the game type decides what content to fetch.
+    const levelsRes = await trainerApi.getLevels()
     levels.value = levelsRes.data || []
+    if (isTheory.value) {
+      const res = await trainerApi.getTheory(props.id)
+      theorySlides.value = res.data || []
+      items.value = []
+    } else {
+      const res = await trainerApi.getCards(props.id)
+      items.value = res.data || []
+      theorySlides.value = []
+    }
     restart()
   } catch {
     items.value = []
+    theorySlides.value = []
   } finally {
     loading.value = false
   }

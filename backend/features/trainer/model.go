@@ -12,7 +12,7 @@ type Level struct {
 	OrderIndex  int    `json:"order_index"`
 	PosX        int    `json:"pos_x"` // 0..100 position on the map
 	PosY        int    `json:"pos_y"`
-	GameType    string `json:"game_type"` // "match" (find the pair, simple level) or "word_build" (assemble a word, mini-boss level)
+	GameType    string `json:"game_type"` // "match" (find the pair), "word_build" (assemble a word, mini-boss), "sentence_build" (assemble a sentence, unit boss), "theory" (grammar cards)
 
 	// Per-user fields (filled in when fetched for an authenticated user).
 	Completed bool `json:"completed"`
@@ -28,6 +28,19 @@ type VocabItem struct {
 	WordEn  string `json:"word_en"`
 	WordRu  string `json:"word_ru"`
 	Emoji   string `json:"emoji"`
+}
+
+// TheorySlide is one short grammar card in a "theory" level. Theory levels
+// keep the theory share of the course small: a handful of cards per unit,
+// each with a rule in Russian and one example sentence.
+type TheorySlide struct {
+	ID         int    `json:"id"`
+	LevelID    int    `json:"level_id"`
+	OrderIndex int    `json:"order_index"`
+	TitleRu    string `json:"title_ru"`
+	BodyRu     string `json:"body_ru"`
+	ExampleEn  string `json:"example_en"`
+	ExampleRu  string `json:"example_ru"`
 }
 
 // UserProgress records completion of a level by a user.

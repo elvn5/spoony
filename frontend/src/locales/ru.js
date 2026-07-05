@@ -42,6 +42,15 @@ export default {
     words: 'слов',
     cityOf: 'Город',
     boss: 'Мини-босс',
+    theory: 'Теория',
+    cards: 'карточек',
+  },
+  theory: {
+    cardOf: 'Карточка {current} из {total}',
+    done: 'Понятно!',
+  },
+  sentenceBuild: {
+    hint: 'Собери предложение из слов по порядку!',
   },
   game: {
     title: 'Найди пару',
@@ -53,6 +62,8 @@ export default {
     winSub: 'Ты выучил новые английские слова!',
     bossWin: 'Босс повержен! 👑',
     bossWinSub: 'Ты успешно прошёл проверку слов!',
+    theoryWin: 'Теория изучена!',
+    theoryWinSub: 'Теперь закрепи её на практике!',
     stars: 'звёзд',
     nextCity: 'Следующий город',
     backToMap: 'К карте',

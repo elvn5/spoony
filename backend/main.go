@@ -52,6 +52,7 @@ func main() {
 	{
 		learn.GET("/levels", trainer.GetLevels)
 		learn.GET("/levels/:id/cards", trainer.GetLevelCards)
+		learn.GET("/levels/:id/theory", trainer.GetLevelTheory)
 		learn.POST("/levels/:id/complete", trainer.CompleteLevel)
 		learn.GET("/stats", trainer.GetUserStats)
 	}

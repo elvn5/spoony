@@ -80,6 +80,42 @@ func GetLevelCards(c *gin.Context) {
 	c.JSON(http.StatusOK, items)
 }
 
+// GetLevelTheory returns the grammar cards for a "theory" level.
+func GetLevelTheory(c *gin.Context) {
+	levelID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid level id"})
+		return
+	}
+
+	rows, err := database.DB.Query(
+		`SELECT id, level_id, order_index, title_ru, body_ru, example_en, example_ru
+		 FROM theory_slides WHERE level_id = $1 ORDER BY order_index ASC, id ASC`, levelID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "database error"})
+		return
+	}
+	defer rows.Close()
+
+	slides := []TheorySlide{}
+	for rows.Next() {
+		var s TheorySlide
+		if err := rows.Scan(&s.ID, &s.LevelID, &s.OrderIndex, &s.TitleRu, &s.BodyRu,
+			&s.ExampleEn, &s.ExampleRu); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "scan error"})
+			return
+		}
+		slides = append(slides, s)
+	}
+
+	if len(slides) == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "no theory for this level"})
+		return
+	}
+
+	c.JSON(http.StatusOK, slides)
+}
+
 // CompleteLevel records that the user finished a level, keeping the best star score.
 func CompleteLevel(c *gin.Context) {
 	userID := c.GetInt("user_id")
