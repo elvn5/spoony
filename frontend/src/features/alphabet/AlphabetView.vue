@@ -9,28 +9,27 @@
       <p class="text-muted-foreground text-xs mt-2 leading-relaxed">{{ $t('alphabet.intro') }}</p>
     </header>
 
+    <!-- Only the unlocked part of the course is listed — the next level
+         appears when the previous one is completed. -->
     <div class="space-y-3">
       <button
         v-for="lvl in levelCards"
         :key="lvl.id"
         class="w-full flex items-center gap-4 rounded-2xl border border-border bg-card p-4 text-left transition-transform active:scale-[0.98]"
-        :class="lvl.unlocked ? '' : 'opacity-60'"
         @click="openLevel(lvl)"
       >
         <div
           class="h-14 w-14 shrink-0 rounded-2xl flex items-center justify-center text-2xl font-extrabold"
-          :class="lvl.completed ? 'bg-green-500/15 text-green-600' : lvl.unlocked ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'"
+          :class="lvl.completed ? 'bg-green-500/15 text-green-600' : 'bg-primary/15 text-primary'"
         >
-          <span v-if="!lvl.unlocked">🌫️</span>
-          <span v-else-if="lvl.completed">✓</span>
+          <span v-if="lvl.completed">✓</span>
           <span v-else>{{ lvl.id }}</span>
         </div>
-        <!-- Fogged (blurred) while the level is locked -->
-        <div class="min-w-0 flex-1" :class="lvl.unlocked ? '' : 'blur-[4px] select-none opacity-60'">
+        <div class="min-w-0 flex-1">
           <p class="font-bold truncate">{{ lvl.title }}</p>
           <p class="text-xs text-muted-foreground mt-0.5">{{ lvl.range }}</p>
         </div>
-        <span class="text-sm font-semibold text-primary shrink-0" v-if="lvl.unlocked">
+        <span class="text-sm font-semibold text-primary shrink-0">
           {{ lvl.completed ? $t('alphabet.review') : $t('alphabet.play') }}
         </span>
       </button>
@@ -42,7 +41,7 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { hapticFeedback, showAlert } from '../../services/telegram'
+import { hapticFeedback } from '../../services/telegram'
 import { getCompletedAlphabetLevels } from './progress'
 import { phonicsWords, COMBO_GROUPS } from './data/phonicsWords'
 import { greetingWords } from './data/greetingWords'
@@ -77,15 +76,12 @@ const levelCards = computed(() => {
     })
   })
 
-  return cards
+  // Hide everything past the current level: the next card appears
+  // only when the previous one is completed.
+  return cards.filter(c => c.unlocked)
 })
 
 function openLevel(lvl) {
-  if (!lvl.unlocked) {
-    hapticFeedback('rigid')
-    showAlert(t('alphabet.locked'))
-    return
-  }
   hapticFeedback('light')
   router.push(lvl.path)
 }

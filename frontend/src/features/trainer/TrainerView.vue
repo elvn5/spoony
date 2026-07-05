@@ -48,25 +48,24 @@
       <span class="absolute text-2xl opacity-70 select-none" style="left:80%; top:30%">🐑</span>
       <span class="absolute text-2xl opacity-70 select-none" style="left:14%; top:14%">🏁</span>
 
-      <!-- city nodes -->
+      <!-- city nodes: only the unlocked part of the route is shown — the
+           next level appears on the map when the previous one is completed -->
       <div
-        v-for="level in levels"
+        v-for="(level, i) in visibleLevels"
         :key="level.id"
         class="absolute flex flex-col items-center"
-        :style="{ left: level.pos_x + '%', top: level.pos_y + '%', transform: 'translate(-50%, -50%)' }"
+        :style="{ left: level.pos_x + '%', top: nodeY(i) + '%', transform: 'translate(-50%, -50%)' }"
       >
         <button
           class="relative rounded-full flex items-center justify-center transition-transform active:scale-95 shadow-lg"
-          :class="[nodeClass(level), isBoss(level) ? 'h-20 w-20 text-4xl' : 'h-16 w-16 text-3xl', level.unlocked ? '' : 'blur-[2px]']"
-          :disabled="!level.unlocked"
+          :class="[nodeClass(level), isBoss(level) ? 'h-20 w-20 text-4xl' : 'h-16 w-16 text-3xl']"
           @click="openLevel(level)"
         >
-          <span v-if="!level.unlocked" class="text-2xl">🌫️</span>
-          <span v-else>{{ level.emoji }}</span>
+          <span>{{ level.emoji }}</span>
 
-          <!-- mini-boss badge: hidden by the fog until the level unlocks -->
+          <!-- mini-boss badge -->
           <span
-            v-if="isBoss(level) && level.unlocked"
+            v-if="isBoss(level)"
             class="absolute -top-1 -left-1 h-6 w-6 rounded-full bg-amber-400 text-amber-950 flex items-center justify-center text-xs shadow"
           >👑</span>
 
@@ -77,9 +76,9 @@
           >✓</span>
         </button>
 
-        <!-- label: fogged (blurred) while the level is locked -->
-        <div class="mt-1.5 text-center" :class="level.unlocked ? '' : 'blur-[4px] select-none opacity-60'">
-          <p class="text-xs font-bold leading-none" :class="level.unlocked ? 'text-foreground' : 'text-muted-foreground'">
+        <!-- label -->
+        <div class="mt-1.5 text-center">
+          <p class="text-xs font-bold leading-none text-foreground">
             {{ level.city }}
           </p>
           <p class="text-[10px] text-muted-foreground">{{ level.title_ru }}</p>
@@ -107,23 +106,33 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { trainerApi } from './api'
-import { hapticFeedback, showAlert } from '../../services/telegram'
-import { useI18n } from 'vue-i18n'
+import { hapticFeedback } from '../../services/telegram'
 import Card from '../../components/ui/card.vue'
 import { Map as MapIcon, Star as StarIcon } from 'lucide-vue-next'
 
 const router = useRouter()
-const { t } = useI18n()
 const levels = ref([])
 const loading = ref(true)
 
-const mapHeight = computed(() => Math.max(560, levels.value.length * 130))
+// Only the discovered part of the route: completed levels plus the current
+// one. The rest of the map doesn't exist for the user yet — the next node
+// appears when the previous level is completed.
+const visibleLevels = computed(() => levels.value.filter(l => l.unlocked))
 
-// SVG path connecting the cities in order (coords are 0..100 percentages).
+const mapHeight = computed(() => Math.max(560, visibleLevels.value.length * 130 + 100))
+
+// Vertical position of node i, in % of the map height: the route starts at
+// the bottom and grows upward with a fixed pixel step per level.
+function nodeY(i) {
+  const yPx = mapHeight.value - 90 - i * 130
+  return (yPx / mapHeight.value) * 100
+}
+
+// SVG path connecting the visible cities in order (coords are 0..100 percentages).
 const pathD = computed(() => {
-  if (!levels.value.length) return ''
-  return levels.value
-    .map((l, i) => `${i === 0 ? 'M' : 'L'} ${l.pos_x} ${l.pos_y}`)
+  if (!visibleLevels.value.length) return ''
+  return visibleLevels.value
+    .map((l, i) => `${i === 0 ? 'M' : 'L'} ${l.pos_x} ${nodeY(i)}`)
     .join(' ')
 })
 
@@ -133,19 +142,11 @@ function isBoss(level) {
 
 function nodeClass(level) {
   if (level.completed) return 'bg-green-500/15 ring-4 ring-green-500/60'
-  if (level.unlocked) {
-    if (isBoss(level)) return 'bg-amber-400 text-amber-950 ring-4 ring-amber-300 animate-bounce-slow'
-    return 'bg-primary text-primary-foreground ring-4 ring-primary/30 animate-bounce-slow'
-  }
-  return 'bg-muted ring-4 ring-border opacity-70 cursor-not-allowed'
+  if (isBoss(level)) return 'bg-amber-400 text-amber-950 ring-4 ring-amber-300 animate-bounce-slow'
+  return 'bg-primary text-primary-foreground ring-4 ring-primary/30 animate-bounce-slow'
 }
 
 function openLevel(level) {
-  if (!level.unlocked) {
-    hapticFeedback('rigid')
-    showAlert(t('trainer.locked'))
-    return
-  }
   hapticFeedback('light')
   router.push(`/trainer/${level.id}`)
 }
