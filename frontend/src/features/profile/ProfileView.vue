@@ -48,6 +48,22 @@
         </Button>
       </Card>
 
+      <!-- Sound diagnostics (Android/iOS Telegram WebView TTS troubleshooting) -->
+      <Card class="p-4">
+        <p class="text-sm font-semibold mb-1">{{ $t('profile.soundTest') }}</p>
+        <p class="text-muted-foreground text-xs mb-3">{{ $t('profile.soundTestHint') }}</p>
+        <div class="space-y-2">
+          <Button variant="outline" class="w-full justify-between" @click="playTestTone">
+            <span>{{ $t('profile.soundTestTone') }}</span>
+            <span class="text-xs text-muted-foreground">{{ toneStatus }}</span>
+          </Button>
+          <Button variant="outline" class="w-full justify-between" @click="playTestSpeech">
+            <span>{{ $t('profile.soundTestSpeech') }}</span>
+            <span class="text-xs text-muted-foreground">{{ speechStatus }}</span>
+          </Button>
+        </div>
+      </Card>
+
       <!-- Language switch -->
       <Card class="p-4">
         <p class="text-sm font-semibold mb-3">{{ $t('profile.language') }}</p>
@@ -98,6 +114,48 @@ const { locale } = useI18n()
 const stats = reactive({ total_levels: 0, completed_levels: 0, total_stars: 0, learned_words: 0 })
 const inTelegram = isTelegramEnvironment()
 const telegramLink = ref('')
+
+// Sound diagnostics: two independent checks so we can tell whether a silent
+// device is blocking audio entirely, or whether it's speechSynthesis
+// specifically (no TTS voices, engine not implemented, etc).
+const toneStatus = ref('')
+const speechStatus = ref('')
+
+function playTestTone() {
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext
+    const ctx = new AudioContextClass()
+    const oscillator = ctx.createOscillator()
+    const gain = ctx.createGain()
+    oscillator.type = 'sine'
+    oscillator.frequency.value = 880
+    gain.gain.setValueAtTime(0.2, ctx.currentTime)
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6)
+    oscillator.connect(gain)
+    gain.connect(ctx.destination)
+    oscillator.start()
+    oscillator.stop(ctx.currentTime + 0.6)
+    toneStatus.value = '🔊'
+  } catch {
+    toneStatus.value = '❌'
+  }
+}
+
+function playTestSpeech() {
+  if (!window.speechSynthesis) {
+    speechStatus.value = '❌ no API'
+    return
+  }
+  const voiceCount = window.speechSynthesis.getVoices().length
+  speechStatus.value = `… (${voiceCount} voices)`
+  window.speechSynthesis.cancel()
+  const utterance = new SpeechSynthesisUtterance('Hello, this is a test')
+  utterance.lang = 'en-US'
+  utterance.onstart = () => { speechStatus.value = `▶️ (${voiceCount})` }
+  utterance.onend = () => { speechStatus.value = `✅ (${voiceCount})` }
+  utterance.onerror = () => { speechStatus.value = `❌ (${voiceCount})` }
+  setTimeout(() => window.speechSynthesis.speak(utterance), 0)
+}
 
 async function loadStats() {
   try {
