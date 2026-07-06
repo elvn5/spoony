@@ -1,0 +1,332 @@
+a
+b
+c
+d
+e
+f
+g
+h
+i
+j
+k
+l
+m
+n
+o
+p
+q
+r
+s
+t
+u
+v
+w
+x
+y
+z
+hello
+water
+room
+school
+girl
+moon
+room
+spoon
+food
+zoo
+boot
+pool
+roof
+book
+look
+cook
+foot
+wood
+good
+tree
+bee
+green
+feet
+sleep
+sea
+tea
+eat
+read
+leaf
+peach
+rain
+train
+snail
+tail
+paint
+nail
+day
+play
+gray
+say
+way
+boat
+coat
+goat
+road
+soap
+toast
+house
+mouse
+cloud
+cow
+brown
+flower
+snow
+window
+yellow
+grow
+coin
+boy
+toy
+oil
+point
+car
+star
+park
+farm
+shark
+arm
+fork
+horse
+corn
+door
+storm
+night
+light
+right
+high
+ship
+shop
+fish
+shoe
+sheep
+brush
+chair
+cheese
+chicken
+watch
+beach
+lunch
+three
+mouth
+teeth
+bath
+thumb
+phone
+photo
+elephant
+dolphin
+duck
+clock
+sock
+black
+truck
+ring
+king
+sing
+wing
+long
+white
+whale
+wheel
+what
+where
+queen
+question
+quick
+apple
+banana
+orange
+grape
+strawberry
+cherry
+cat
+dog
+rabbit
+fox
+bear
+lion
+bread
+cheese
+egg
+milk
+pizza
+cake
+fish
+whale
+octopus
+crab
+turtle
+dolphin
+book
+pencil
+scissors
+clock
+key
+bell
+ball
+basketball
+tennis
+bicycle
+trophy
+medal
+guitar
+drum
+piano
+microphone
+trumpet
+violin
+sun
+rain
+snow
+star
+rainbow
+cloud
+hi
+bye
+yes
+no
+please
+thanks
+friend
+I'm Molly. You're late.
+She's from Italy. We're American.
+Are you Tom? — No, I'm not.
+one
+two
+three
+five
+seven
+ten
+Russia
+England
+the USA
+Italy
+Spain
+Japan
+I am from Russia
+You are late
+Nice to meet you
+Where are you from?
+We are American
+It's a key. It's an umbrella.
+one child, two children
+It's my sister's bag.
+pen
+bag
+umbrella
+watch
+glasses
+wallet
+mother
+father
+sister
+brother
+grandmother
+grandfather
+red
+blue
+green
+yellow
+black
+white
+This is my family
+My car is red
+It is an umbrella
+My brother is tall
+The keys are old
+I watch TV in the evening.
+He speaks English at work.
+Do you like tea? — No, I don't.
+coffee
+tea
+water
+juice
+sandwich
+salad
+doctor
+teacher
+policeman
+student
+factory worker
+waiter
+I drink coffee every morning
+She works in a hospital
+Do you like tea?
+We eat fast food
+I always get up at seven.
+You can't park here.
+Can you swim? — Yes, I can.
+get up
+have breakfast
+go to work
+have lunch
+watch TV
+go to bed
+swim
+dance
+sing
+run
+drive
+play tennis
+Can you swim?
+She never watches TV
+We sometimes play tennis
+They were famous.
+It changed my life.
+We went to Rome.
+buy a ticket
+stay at a hotel
+meet a friend
+take photos
+lose your keys
+rent a car
+I was at home yesterday
+They were in Rome last week
+We bought some food
+She got up early
+He went on holiday in July
+There is a shop in the village.
+There are a lot of cafés.
+There was a castle here.
+bed
+shower
+bathroom
+lamp
+lift
+reception
+bank
+hospital
+museum
+supermarket
+church
+beach
+There is a hotel near here
+There are two banks
+Is there a park near here?
+The museum is old
+She likes dancing.
+We're going to visit Rome.
+Look at the clouds! It's going to rain.
+sunny
+windy
+hot
+cold
+snowy
+foggy
+shopping
+camping
+fishing
+cycling
+painting
+skiing
+I like reading in bed
+We are going to travel to Italy
+It is going to rain
+What are you going to do?

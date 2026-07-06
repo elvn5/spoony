@@ -89,6 +89,7 @@ export default {
     soundTestHint: "If games are silent for you, test here — it'll help pin down why.",
     soundTestTone: 'Test tone',
     soundTestSpeech: 'Test word playback',
+    soundTestWordAudio: 'Test word audio file',
   },
   alphabet: {
     title: 'First Steps',

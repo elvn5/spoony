@@ -61,6 +61,10 @@
             <span>{{ $t('profile.soundTestSpeech') }}</span>
             <span class="text-xs text-muted-foreground">{{ speechStatus }}</span>
           </Button>
+          <Button variant="outline" class="w-full justify-between" @click="playTestWordAudio">
+            <span>{{ $t('profile.soundTestWordAudio') }}</span>
+            <span class="text-xs text-muted-foreground">{{ wordAudioStatus }}</span>
+          </Button>
         </div>
       </Card>
 
@@ -102,6 +106,7 @@ import { telegramApi } from './api'
 import { storage } from '../../services/storage'
 import { isTelegramEnvironment } from '../../services/telegram'
 import { formatDate } from '../../utils/helpers'
+import { speakWord } from '../../services/tts'
 import Button from '../../components/ui/button.vue'
 import Card from '../../components/ui/card.vue'
 import Avatar from '../../components/ui/avatar.vue'
@@ -115,11 +120,23 @@ const stats = reactive({ total_levels: 0, completed_levels: 0, total_stars: 0, l
 const inTelegram = isTelegramEnvironment()
 const telegramLink = ref('')
 
-// Sound diagnostics: two independent checks so we can tell whether a silent
-// device is blocking audio entirely, or whether it's speechSynthesis
-// specifically (no TTS voices, engine not implemented, etc).
+// Sound diagnostics: three independent checks so we can tell whether a
+// silent device is blocking audio entirely, whether it's speechSynthesis
+// specifically (no TTS voices, engine not implemented, etc — this is why
+// games now use pre-generated audio files instead), or whether the
+// pre-generated word-audio files themselves fail to play.
 const toneStatus = ref('')
 const speechStatus = ref('')
+const wordAudioStatus = ref('')
+
+function playTestWordAudio() {
+  wordAudioStatus.value = '…'
+  const audio = new Audio('/audio/apple.mp3')
+  audio.addEventListener('playing', () => { wordAudioStatus.value = '▶️' })
+  audio.addEventListener('ended', () => { wordAudioStatus.value = '✅' })
+  audio.addEventListener('error', () => { wordAudioStatus.value = '❌' })
+  audio.play().catch(() => { wordAudioStatus.value = '❌ play blocked' })
+}
 
 function playTestTone() {
   try {
