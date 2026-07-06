@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { storage } from '../services/storage'
 import { useAdminStore } from '../features/admin/store'
-import { isAlphabetCompleted } from '../features/alphabet/progress'
+import { isAlphabetCompleted, loadAlphabetProgress } from '../features/alphabet/progress'
 import { i18n } from '../i18n'
 import { showAlert } from '../services/telegram'
 
@@ -36,13 +36,16 @@ const router = createRouter({
   scrollBehavior: () => ({ top: 0 }),
 })
 
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   if (to.meta.requiresAuth && !storage.get('token')) {
     return { name: 'Home' }
   }
-  if (to.meta.requiresAlphabet && !isAlphabetCompleted()) {
-    try { showAlert(i18n.global.t('trainer.lockedByAlphabet')) } catch {}
-    return { name: 'Alphabet' }
+  if (to.meta.requiresAlphabet) {
+    await loadAlphabetProgress()
+    if (!isAlphabetCompleted()) {
+      try { showAlert(i18n.global.t('trainer.lockedByAlphabet')) } catch {}
+      return { name: 'Alphabet' }
+    }
   }
   if (to.meta.requiresAdmin) {
     const adminStore = useAdminStore()

@@ -80,6 +80,18 @@ func RunMigrations() {
 			completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			PRIMARY KEY (user_id, level_id)
 		)`,
+
+		// Per-user "First Steps" (alphabet) completion. Unlike the trainer's
+		// levels, the alphabet's 10 levels (4 base + 6 letter-combo groups)
+		// are defined in frontend data, not a DB table, so level_id here is
+		// just the 1-10 index the frontend already uses — no FK.
+		`CREATE TABLE IF NOT EXISTS alphabet_progress (
+			user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+			level_id INT NOT NULL,
+			completed BOOLEAN DEFAULT TRUE,
+			completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			PRIMARY KEY (user_id, level_id)
+		)`,
 	}
 
 	for _, q := range queries {

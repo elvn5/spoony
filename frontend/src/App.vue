@@ -22,6 +22,7 @@
 import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useUserStore } from './features/auth/store'
+import { loadAlphabetProgress } from './features/alphabet/progress'
 import { initTelegram } from './services/telegram'
 import SideNav from './components/SideNav.vue'
 import BottomNav from './components/BottomNav.vue'
@@ -39,6 +40,7 @@ onMounted(() => {
   initTelegram()
   if (userStore.isAuthenticated) {
     userStore.fetchMe()
+    loadAlphabetProgress()
   }
 })
 </script>
