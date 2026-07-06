@@ -89,6 +89,7 @@ export default {
     soundTestHint: 'Если в играх не слышно звука, проверь тут — это поможет найти причину.',
     soundTestTone: 'Тестовый сигнал',
     soundTestSpeech: 'Тест озвучки слова',
+    soundTestWordAudio: 'Тест аудиофайла слова',
   },
   alphabet: {
     title: 'Первые шаги',
