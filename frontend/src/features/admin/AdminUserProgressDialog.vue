@@ -41,6 +41,23 @@
           </Button>
         </div>
       </div>
+
+      <div>
+        <p class="text-xs font-semibold text-muted-foreground mb-2 px-1">First Steps (alphabet)</p>
+        <div class="max-h-72 overflow-y-auto space-y-2 pr-1">
+          <div
+            v-for="lvl in alphabetLevels" :key="lvl.id"
+            class="flex items-center gap-3 rounded-xl border border-border p-3"
+          >
+            <span class="text-lg shrink-0">🔤</span>
+            <p class="text-sm font-medium truncate min-w-0 flex-1">{{ lvl.label }}</p>
+            <Switch
+              :checked="alphaEdits[lvl.id]"
+              @update:checked="v => onToggleAlphabet(lvl.id, v)"
+            />
+          </div>
+        </div>
+      </div>
     </div>
   </Dialog>
 </template>
@@ -48,10 +65,19 @@
 <script setup>
 import { ref, reactive, computed, watch } from 'vue'
 import adminApi from './api'
+import { COMBO_GROUPS } from '../alphabet/data/phonicsWords'
 import Dialog from '../../components/ui/dialog.vue'
 import Select from '../../components/ui/select.vue'
 import Switch from '../../components/ui/switch.vue'
 import Button from '../../components/ui/button.vue'
+
+const alphabetLevels = [
+  { id: 1, label: 'Letters A–M' },
+  { id: 2, label: 'Letters N–Z' },
+  { id: 3, label: 'Match pairs' },
+  { id: 4, label: 'Build words' },
+  ...COMBO_GROUPS.map((g, i) => ({ id: 5 + i, label: g.combos.join(', ') })),
+]
 
 const props = defineProps({
   open: { type: Boolean, default: false },
@@ -62,6 +88,7 @@ defineEmits(['update:open'])
 const loading = ref(false)
 const detail = ref(null)
 const edits = reactive({})
+const alphaEdits = reactive({})
 
 const subtitle = computed(() => detail.value ? `#${detail.value.user.id} — tap a row to edit stars or mark complete` : '')
 
@@ -75,10 +102,22 @@ async function load() {
     for (const lvl of data.progress) {
       edits[lvl.id] = { stars: lvl.stars, completed: lvl.completed }
     }
+    for (const lvl of alphabetLevels) {
+      alphaEdits[lvl.id] = (data.alphabet_progress || []).includes(lvl.id)
+    }
   } catch {
     detail.value = null
   } finally {
     loading.value = false
+  }
+}
+
+function onToggleAlphabet(levelId, value) {
+  alphaEdits[levelId] = value
+  if (value) {
+    adminApi.put(`/users/${props.userId}/alphabet-progress/${levelId}`).catch(() => {})
+  } else {
+    adminApi.delete(`/users/${props.userId}/alphabet-progress/${levelId}`).catch(() => {})
   }
 }
 

@@ -148,7 +148,25 @@ func AdminGetUser(c *gin.Context) {
 		progress = append(progress, lp)
 	}
 
-	c.JSON(http.StatusOK, gin.H{"user": user, "progress": progress})
+	alphaRows, err := database.DB.Query(
+		`SELECT level_id FROM alphabet_progress WHERE user_id = $1 AND completed = true`, userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "database error"})
+		return
+	}
+	defer alphaRows.Close()
+
+	alphabetProgress := []int{}
+	for alphaRows.Next() {
+		var id int
+		if err := alphaRows.Scan(&id); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "scan error"})
+			return
+		}
+		alphabetProgress = append(alphabetProgress, id)
+	}
+
+	c.JSON(http.StatusOK, gin.H{"user": user, "progress": progress, "alphabet_progress": alphabetProgress})
 }
 
 // AdminUpdateUserProgress lets an admin correct a user's stars/completion on
@@ -208,6 +226,51 @@ func AdminResetUserProgress(c *gin.Context) {
 	}
 
 	database.DB.Exec(`DELETE FROM user_progress WHERE user_id = $1 AND level_id = $2`, userID, levelID)
+	c.JSON(http.StatusOK, gin.H{"ok": true})
+}
+
+// AdminUpdateAlphabetProgress marks a "First Steps" level completed for a
+// user (e.g. to unlock the section, or a level further into it, for a kid
+// who's stuck).
+func AdminUpdateAlphabetProgress(c *gin.Context) {
+	userID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user id"})
+		return
+	}
+	levelID, err := strconv.Atoi(c.Param("levelId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid level id"})
+		return
+	}
+
+	_, err = database.DB.Exec(`
+		INSERT INTO alphabet_progress (user_id, level_id, completed, completed_at)
+		VALUES ($1, $2, true, NOW())
+		ON CONFLICT (user_id, level_id) DO UPDATE SET completed = true, completed_at = NOW()`,
+		userID, levelID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update progress"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"ok": true})
+}
+
+// AdminResetAlphabetProgress re-locks a "First Steps" level (and everything
+// after it, since levels unlock sequentially).
+func AdminResetAlphabetProgress(c *gin.Context) {
+	userID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user id"})
+		return
+	}
+	levelID, err := strconv.Atoi(c.Param("levelId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid level id"})
+		return
+	}
+
+	database.DB.Exec(`DELETE FROM alphabet_progress WHERE user_id = $1 AND level_id = $2`, userID, levelID)
 	c.JSON(http.StatusOK, gin.H{"ok": true})
 }
 

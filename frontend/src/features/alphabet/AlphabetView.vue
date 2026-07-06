@@ -38,17 +38,19 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { hapticFeedback } from '../../services/telegram'
-import { getCompletedAlphabetLevels } from './progress'
+import { getCompletedAlphabetLevels, loadAlphabetProgress } from './progress'
 import { phonicsWords, COMBO_GROUPS } from './data/phonicsWords'
 import { greetingWords } from './data/greetingWords'
 import { Puzzle as PuzzleIcon } from 'lucide-vue-next'
 
 const router = useRouter()
 const { t } = useI18n()
+
+onMounted(loadAlphabetProgress)
 
 const levelCards = computed(() => {
   const completed = getCompletedAlphabetLevels()

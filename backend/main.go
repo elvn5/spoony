@@ -7,6 +7,7 @@ import (
 	"spoony/config"
 	"spoony/database"
 	"spoony/features/admin"
+	"spoony/features/alphabet"
 	"spoony/features/auth"
 	"spoony/features/news"
 	"spoony/features/telegrambot"
@@ -55,6 +56,9 @@ func main() {
 		learn.GET("/levels/:id/theory", trainer.GetLevelTheory)
 		learn.POST("/levels/:id/complete", trainer.CompleteLevel)
 		learn.GET("/stats", trainer.GetUserStats)
+
+		learn.GET("/alphabet-progress", alphabet.GetProgress)
+		learn.POST("/alphabet-progress/:levelId/complete", alphabet.CompleteLevel)
 	}
 
 	// Telegram webhook (no auth — called by Telegram servers)
@@ -73,6 +77,8 @@ func main() {
 			adminAPI.DELETE("/users/:id", admin.AdminDeleteUser)
 			adminAPI.PUT("/users/:id/progress/:levelId", admin.AdminUpdateUserProgress)
 			adminAPI.DELETE("/users/:id/progress/:levelId", admin.AdminResetUserProgress)
+			adminAPI.PUT("/users/:id/alphabet-progress/:levelId", admin.AdminUpdateAlphabetProgress)
+			adminAPI.DELETE("/users/:id/alphabet-progress/:levelId", admin.AdminResetAlphabetProgress)
 
 			adminAPI.GET("/news", admin.AdminListNews)
 			adminAPI.POST("/news", admin.AdminCreateNews)
